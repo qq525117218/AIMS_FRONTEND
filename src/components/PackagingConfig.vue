@@ -102,10 +102,24 @@
                     <el-input v-model="formData.marketing.sku" placeholder="例如：SKU-2024-X01" class="brand-input-lg" clearable />
                   </el-form-item>
                 </div>
+
                 <div class="form-section-block">
                   <el-form-item prop="marketing.brand" class="brand-item">
                     <div class="label-with-icon"><el-icon><Trophy /></el-icon> 品牌名称 (Brand Name)</div>
-                    <el-input v-model="formData.marketing.brand" placeholder="例如：Nescafe, Dove..." class="brand-input-lg" clearable />
+                    <el-select
+                        v-model="formData.marketing.brand"
+                        placeholder="请选择品牌 / Select Brand"
+                        class="brand-input-lg"
+                        filterable
+                        clearable
+                    >
+                      <el-option
+                          v-for="item in brandOptions"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.name"
+                      />
+                    </el-select>
                   </el-form-item>
                 </div>
                 <div class="form-section-block">
@@ -182,6 +196,7 @@ const {
   fileName,
   loading,
   inputValue,
+  brandOptions, // Added: destructured brandOptions
   nextStep,
   prevStep,
   handleFileUpload,

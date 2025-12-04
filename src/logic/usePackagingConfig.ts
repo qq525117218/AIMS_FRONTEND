@@ -1,7 +1,7 @@
 import { reactive, ref } from 'vue'
 import { ElMessage, ElLoading, type FormInstance, type FormRules, type UploadFile } from 'element-plus'
 
-// 前端使用的驼峰命名接口 (保持不变，方便组件调用)
+// 前端使用的驼峰命名接口
 export interface Dimensions { length: number; width: number; height: number; bleedX: number; bleedY: number; bleedInner: number; }
 export interface Content {
     productName: string;
@@ -21,7 +21,7 @@ export interface WorkflowData {
     marketing: Marketing;
 }
 
-// 后端返回的 JSON 结构定义 (用于类型提示)
+// 后端返回的 JSON 结构定义 (用于文档解析)
 interface ParseDocResponse {
     code: number
     is_success: boolean
@@ -43,6 +43,28 @@ interface ParseDocResponse {
     }
 }
 
+// --- 品牌接口定义 ---
+export interface BrandItem {
+    id: number
+    code: string
+    name: string
+    abbr: string
+    brand_category_name: string
+    department_name: string
+    status: number
+    is_deleted: number
+}
+
+interface BrandListResponse {
+    code: number
+    is_success: boolean
+    message: string
+    request_id: string
+    data: {
+        plm_brand_data: BrandItem[]
+    }
+}
+
 export function usePackagingConfig() {
     const activeStep = ref(0)
     const formRef = ref<FormInstance>()
@@ -50,6 +72,9 @@ export function usePackagingConfig() {
     const fileName = ref('')
     const loading = ref(false)
     const inputValue = ref('')
+
+    // --- 品牌列表数据 ---
+    const brandOptions = ref<BrandItem[]>([])
 
     const formData = reactive<WorkflowData>({
         dimensions: { length: 0, width: 0, height: 0, bleedX: 3, bleedY: 3, bleedInner: 3 },
@@ -66,7 +91,7 @@ export function usePackagingConfig() {
         'dimensions.height': [{ required: true, message: 'Required', trigger: 'blur' }],
         'content.productName': [{ required: true, message: '请上传文档', trigger: 'change' }],
         'marketing.sku': [{ required: true, message: '请输入 SKU', trigger: 'blur' }],
-        'marketing.brand': [{ required: true, message: '请输入品牌', trigger: 'blur' }],
+        'marketing.brand': [{ required: true, message: '请选择品牌', trigger: 'change' }],
         'marketing.capacityValue': [{ required: true, message: '请输入规格', trigger: 'blur' }]
     })
 
@@ -106,11 +131,9 @@ export function usePackagingConfig() {
         try {
             const base64String = await fileToBase64(file.raw)
 
-            // 1. 修改接口地址: /api/Document/parse/word -> /api/document/parse/word
             const response = await fetch('/api/document/parse/word', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // 2. 修改请求参数 Key: 驼峰 -> 下划线
                 body: JSON.stringify({
                     file_name: file.name,
                     file_content_base64: base64String
@@ -122,16 +145,14 @@ export function usePackagingConfig() {
             if (response.ok && resData.code === 200 && resData.is_success && resData.data) {
                 const parsed = resData.data.content
 
-                // 3. 修改响应映射: 下划线 -> 驼峰
                 Object.assign(formData.content, {
                     productName: parsed.product_name || '',
                     manufacturer: parsed.manufacturer || '',
-                    origin: parsed.country_of_origin || '', // country_of_origin
+                    origin: parsed.country_of_origin || '',
                     warnings: parsed.warnings || '',
-                    shelfLife: parsed.shelf_life || '',     // shelf_life
+                    shelfLife: parsed.shelf_life || '',
                     address: parsed.address || '',
                     directions: parsed.directions || '',
-                    // 处理 ingredients 对象
                     ingredients: parsed.ingredients?.raw_text ||
                         (parsed.ingredients?.active_ingredients ? `Active: ${parsed.ingredients.active_ingredients}\n` : '') +
                         (parsed.ingredients?.inactive_ingredients ? `Inactive: ${parsed.ingredients.inactive_ingredients}` : '')
@@ -170,13 +191,144 @@ export function usePackagingConfig() {
         }
     }
 
-    const handleGeneratePSD = () => {
+    // --- 修改：PSD 生成与下载逻辑 ---
+    const handleGeneratePSD = async () => {
         loading.value = true
-        setTimeout(() => {
+        try {
+            const token = localStorage.getItem('token')
+            const username = localStorage.getItem('username') || 'User'
+
+            // 1. 构造 Payload (对应后端 PsdRequestDto)
+            const payload = {
+                project_name: `${formData.marketing.brand}_${formData.marketing.sku}`.replace(/\s+/g, '_'),
+                user_context: {
+                    username: username,
+                    generate_dieline: true
+                },
+                specifications: {
+                    dimensions: {
+                        length: formData.dimensions.length,
+                        width: formData.dimensions.width,
+                        height: formData.dimensions.height
+                    },
+                    print_config: {
+                        bleed_x: formData.dimensions.bleedX,
+                        bleed_y: formData.dimensions.bleedY,
+                        bleed_inner: formData.dimensions.bleedInner,
+                        resolution_dpi: 300
+                    }
+                },
+                assets: {
+                    texts: {
+                        main_panel: {
+                            brand_name: formData.marketing.brand,
+                            product_name: formData.content.productName,
+                            capacity_info: formData.marketing.capacityValue,
+                            selling_points: formData.marketing.sellingPoints
+                        },
+                        info_panel: {
+                            ingredients: formData.content.ingredients,
+                            manufacturer: formData.content.manufacturer,
+                            origin: formData.content.origin,
+                            warnings: formData.content.warnings,
+                            directions: formData.content.directions,
+                            address: formData.content.address
+                        }
+                    },
+                    dynamic_images: {
+                        barcode: {
+                            value: formData.marketing.sku,
+                            type: 'EAN-13'
+                        }
+                    }
+                }
+            }
+
+            // 2. 发起请求
+            const response = await fetch('/api/design/generate/psd', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify(payload)
+            })
+
+            // 3. 错误处理 (如果是 JSON 错误响应)
+            const contentType = response.headers.get('content-type')
+            if (!response.ok) {
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json()
+                    throw new Error(errorData.message || '生成请求被拒绝')
+                } else {
+                    throw new Error(`服务器错误: ${response.status}`)
+                }
+            }
+
+            // 4. 处理 Blob 并下载
+            const blob = await response.blob()
+            if (blob.size === 0) throw new Error('生成的文件内容为空')
+
+            // 创建下载链接
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+
+            // 尝试获取文件名
+            const contentDisposition = response.headers.get('Content-Disposition')
+            let downloadName = `${payload.project_name}.psd`
+            if (contentDisposition) {
+                const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+                if (fileNameMatch != null && fileNameMatch[1]) {
+                    downloadName = fileNameMatch[1].replace(/['"]/g, '')
+                }
+            }
+
+            link.setAttribute('download', downloadName)
+            document.body.appendChild(link)
+            link.click()
+
+            // 清理
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(url)
+
+            ElMessage.success('PSD 文件生成成功，正在下载...')
+
+        } catch (error: any) {
+            console.error('Generate PSD Failed:', error)
+            ElMessage.error(error.message || '生成 PSD 失败，请稍后重试')
+        } finally {
             loading.value = false
-            ElMessage.success('PSD 生成成功')
-        }, 2000)
+        }
     }
+
+    // --- 获取品牌列表逻辑 ---
+    const fetchBrandList = async () => {
+        try {
+            const token = localStorage.getItem('token')
+            const response = await fetch('/api/plm/brand/list', {
+                method: 'GET',
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : ''
+                }
+            })
+
+            if (!response.ok) return
+
+            const text = await response.text();
+            if (!text) return;
+
+            const resData = JSON.parse(text) as BrandListResponse
+
+            if (resData.code === 200 && resData.is_success) {
+                brandOptions.value = resData.data.plm_brand_data
+            }
+        } catch (error) {
+            console.error('Failed to fetch brand list:', error)
+        }
+    }
+
+    fetchBrandList()
 
     return {
         activeStep,
@@ -187,6 +339,7 @@ export function usePackagingConfig() {
         fileName,
         loading,
         inputValue,
+        brandOptions,
         nextStep,
         prevStep,
         handleFileUpload,
