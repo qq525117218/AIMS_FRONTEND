@@ -1,0 +1,24 @@
+/* --- 全局变量 --- */
+$primary-color: #2563eb;
+$bg-color: #f8fafc;
+$card-bg: #ffffff;
+$text-main: #1e293b;
+$text-sec: #64748b;
+$border-color: #e2e8f0;
+
+.workflow-page {
+  background-color: $bg-color;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', sans-serif;
+  color: $text-main;
+}
+
+/* ... (此处请粘贴原 PackagingConfig.vue 中 style 标签内的所有内容) ... */
+
+/* 动画部分也包括 */
+.slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1); }
+.slide-fade-enter-from { opacity: 0; transform: translateY(10px); }
+.slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
