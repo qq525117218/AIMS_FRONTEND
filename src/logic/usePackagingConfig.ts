@@ -1,7 +1,7 @@
 import { reactive, ref } from 'vue'
 import { ElMessage, ElLoading, type FormInstance, type FormRules, type UploadFile } from 'element-plus'
 
-// --- 类型定义 ---
+// 前端使用的驼峰命名接口 (保持不变，方便组件调用)
 export interface Dimensions { length: number; width: number; height: number; bleedX: number; bleedY: number; bleedInner: number; }
 export interface Content {
     productName: string;
@@ -21,7 +21,28 @@ export interface WorkflowData {
     marketing: Marketing;
 }
 
-// --- 组合式函数 ---
+// 后端返回的 JSON 结构定义 (用于类型提示)
+interface ParseDocResponse {
+    code: number
+    is_success: boolean
+    data: {
+        content: {
+            product_name: string
+            manufacturer: string
+            country_of_origin: string
+            warnings: string
+            shelf_life: string
+            address: string
+            directions: string
+            ingredients: {
+                active_ingredients: string
+                inactive_ingredients: string
+                raw_text: string
+            }
+        }
+    }
+}
+
 export function usePackagingConfig() {
     const activeStep = ref(0)
     const formRef = ref<FormInstance>()
@@ -30,7 +51,6 @@ export function usePackagingConfig() {
     const loading = ref(false)
     const inputValue = ref('')
 
-    // 初始化数据
     const formData = reactive<WorkflowData>({
         dimensions: { length: 0, width: 0, height: 0, bleedX: 3, bleedY: 3, bleedInner: 3 },
         content: {
@@ -40,7 +60,6 @@ export function usePackagingConfig() {
         marketing: { sku: '', brand: '', capacityValue: '', capacityUnit: '', sellingPoints: [] }
     })
 
-    // 校验规则
     const rules = reactive<FormRules>({
         'dimensions.length': [{ required: true, message: 'Required', trigger: 'blur' }],
         'dimensions.width': [{ required: true, message: 'Required', trigger: 'blur' }],
@@ -51,7 +70,6 @@ export function usePackagingConfig() {
         'marketing.capacityValue': [{ required: true, message: '请输入规格', trigger: 'blur' }]
     })
 
-    // --- 步骤控制 ---
     const nextStep = async () => {
         if (!formRef.value) return;
         let fields: string[] = []
@@ -68,21 +86,15 @@ export function usePackagingConfig() {
 
     const prevStep = () => { if (activeStep.value > 0) activeStep.value-- }
 
-    // 工具：文件转 Base64
     const fileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader()
             reader.readAsDataURL(file)
-            reader.onload = () => {
-                const result = reader.result as string
-                const base64 = result.split(',')[1]
-                resolve(base64)
-            }
+            reader.onload = () => resolve((reader.result as string).split(',')[1])
             reader.onerror = (error) => reject(error)
         })
     }
 
-    // --- 核心业务：上传解析文档 ---
     const handleFileUpload = async (file: UploadFile) => {
         if (!file.raw) return
 
@@ -93,34 +105,43 @@ export function usePackagingConfig() {
 
         try {
             const base64String = await fileToBase64(file.raw)
-            const response = await fetch('/api/Document/parse/word', {
+
+            // 1. 修改接口地址: /api/Document/parse/word -> /api/document/parse/word
+            const response = await fetch('/api/document/parse/word', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName: file.name, fileContentBase64: base64String })
+                // 2. 修改请求参数 Key: 驼峰 -> 下划线
+                body: JSON.stringify({
+                    file_name: file.name,
+                    file_content_base64: base64String
+                })
             })
 
-            const resData = await response.json()
+            const resData = (await response.json()) as ParseDocResponse
 
-            if (response.ok && resData.code === 200 && resData.data) {
+            if (response.ok && resData.code === 200 && resData.is_success && resData.data) {
                 const parsed = resData.data.content
+
+                // 3. 修改响应映射: 下划线 -> 驼峰
                 Object.assign(formData.content, {
-                    productName: parsed.productName || '',
+                    productName: parsed.product_name || '',
                     manufacturer: parsed.manufacturer || '',
-                    origin: parsed.countryOfOrigin || '',
+                    origin: parsed.country_of_origin || '', // country_of_origin
                     warnings: parsed.warnings || '',
-                    shelfLife: parsed.shelfLife || '',
+                    shelfLife: parsed.shelf_life || '',     // shelf_life
                     address: parsed.address || '',
                     directions: parsed.directions || '',
-                    ingredients: parsed.ingredients?.rawText ||
-                        (parsed.ingredients?.activeIngredients ? `Active: ${parsed.ingredients.activeIngredients}\n` : '') +
-                        (parsed.ingredients?.inactiveIngredients ? `Inactive: ${parsed.ingredients.inactiveIngredients}` : '')
+                    // 处理 ingredients 对象
+                    ingredients: parsed.ingredients?.raw_text ||
+                        (parsed.ingredients?.active_ingredients ? `Active: ${parsed.ingredients.active_ingredients}\n` : '') +
+                        (parsed.ingredients?.inactive_ingredients ? `Inactive: ${parsed.ingredients.inactive_ingredients}` : '')
                 })
 
                 fileName.value = file.name
                 isDocParsed.value = true
                 ElMessage.success('解析成功：文案已自动填充')
             } else {
-                throw new Error(resData.message || '解析失败')
+                throw new Error('解析失败')
             }
         } catch (error: any) {
             console.error(error)
@@ -132,7 +153,6 @@ export function usePackagingConfig() {
         }
     }
 
-    // --- 标签管理 ---
     const handleCloseTag = (tag: string) => {
         formData.marketing.sellingPoints.splice(formData.marketing.sellingPoints.indexOf(tag), 1)
     }

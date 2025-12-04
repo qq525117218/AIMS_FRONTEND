@@ -15,9 +15,223 @@ $border-color: #e2e8f0;
   color: $text-main;
 }
 
-/* ... (此处请粘贴原 PackagingConfig.vue 中 style 标签内的所有内容) ... */
+/* --- Header --- */
+.app-header {
+  height: 60px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid $border-color;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 
-/* 动画部分也包括 */
+  .header-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .logo-box {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+  }
+
+  .app-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: $text-main;
+    .version { background: #eff6ff; color: $primary-color; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+  }
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  .welcome-text { font-size: 14px; font-weight: 500; color: #475569; }
+  .avatar-wrapper { outline: none; }
+  .user-avatar { background: #2563eb; color: white; font-weight: 600; font-size: 14px; transition: transform 0.2s; &:hover { transform: scale(1.05); } }
+}
+
+/* --- Body --- */
+.workflow-body {
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 40px 20px 100px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.steps-container {
+  margin-bottom: 20px;
+  :deep(.el-step__title) { font-size: 13px; font-weight: 500; }
+  :deep(.el-step__head.is-success) { color: $primary-color; border-color: $primary-color; }
+  :deep(.el-step__title.is-success) { color: $text-main; }
+}
+
+.panel-header {
+  text-align: center;
+  margin-bottom: 30px;
+  h2 { font-size: 24px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+  p { color: $text-sec; font-size: 14px; margin: 0; }
+}
+
+.panel-card {
+  background: $card-bg;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+  border: 1px solid rgba(255,255,255,0.5);
+  padding: 32px;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: $text-sec;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+/* --- STEP 1: Dimensions --- */
+.dimension-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f1f5f9;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+
+  &.bleed-theme {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+  }
+}
+
+.dim-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+
+  .dim-bg-icon {
+    font-weight: 800;
+    color: #cbd5e1;
+    font-size: 24px;
+    margin-bottom: 8px;
+    font-family: monospace;
+  }
+  :deep(.el-input-number) { width: 100%; max-width: 120px; }
+  :deep(.el-input__wrapper) { background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.03); border-radius: 8px; padding: 0 10px; }
+  :deep(.el-input__inner) { text-align: center; font-weight: 600; font-size: 18px; }
+  .unit { position: absolute; right: 20px; bottom: 28px; font-size: 12px; color: #94a3b8; pointer-events: none; }
+  .dim-name { margin-top: 8px; font-size: 12px; color: $text-sec; }
+}
+
+.dim-separator {
+  font-size: 24px; color: #cbd5e1; margin: 0 10px; padding-bottom: 20px;
+  &.plus { font-size: 20px; color: #94a3b8; }
+}
+
+.custom-divider { margin: 32px 0; border-top: 1px dashed $border-color; }
+
+/* --- STEP 2: Document --- */
+.hero-upload {
+  :deep(.el-upload-dragger) {
+    width: 100%; height: 200px; border: 2px dashed $border-color; border-radius: 12px;
+    background: #f8fafc; transition: all 0.3s; display: flex; align-items: center; justify-content: center;
+    &:hover { border-color: $primary-color; background: #eff6ff; }
+  }
+}
+.upload-content {
+  .icon-circle { width: 50px; height: 50px; background: white; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); color: $primary-color; font-size: 24px; }
+  h3 { margin: 0; font-size: 16px; font-weight: 600; color: $text-main; }
+  p { margin: 8px 0 0; font-size: 13px; color: $text-sec; }
+}
+.parsed-view {
+  .doc-badge { background: #ecfdf5; color: #059669; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: 600; margin-bottom: 24px; border: 1px solid #a7f3d0; }
+  .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    .data-group {
+      &.full { grid-column: span 2; }
+      label { display: block; font-size: 12px; color: $text-sec; margin-bottom: 6px; }
+      .data-value { padding: 10px 12px; background: #f8fafc; border-radius: 6px; font-size: 14px; color: $text-main; border: 1px solid #f1f5f9; min-height: 42px;
+        &.highlight { font-weight: 600; color: $primary-color; background: #eff6ff; border-color: #dbeafe; }
+        &.text-block { min-height: 60px; line-height: 1.5; font-size: 13px; }
+        &.warning { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+      }
+    }
+  }
+}
+
+/* --- STEP 3: Marketing Optimization --- */
+.form-section-block {
+  margin-bottom: 30px; /* 模块间距 */
+  width: 100%;
+}
+
+.brand-item {
+  margin-bottom: 0; /* 清除默认 margin */
+  .label-with-icon { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; .el-icon { color: #d97706; } }
+  .brand-input-lg :deep(.el-input__wrapper) { padding: 8px 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0 inset; background: #fff; font-size: 18px; font-weight: 700; }
+}
+
+/* 卖点标签 (强制100%宽) */
+.tags-wrapper.enhanced.full-width-tags {
+  width: 100%;
+  box-sizing: border-box; /* 确保 padding 包含在宽度内 */
+  background: #fff; border: 1px solid $border-color; border-radius: 8px; padding: 12px; min-height: 120px; display: flex; flex-direction: column; transition: all 0.3s;
+  &:focus-within { border-color: $primary-color; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+  .tags-list { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; align-content: flex-start; }
+  .new-tag-input { width: 120px; :deep(.el-input__wrapper) { box-shadow: none; padding: 0; background: transparent; } }
+  .quick-tags {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed $border-color; font-size: 12px; color: #94a3b8; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    .q-tag { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; &:hover { background: #e2e8f0; color: #475569; } }
+  }
+}
+
+/* --- STEP 4: Success --- */
+.centered-panel { text-align: center; .panel-card { border: none; box-shadow: none; background: transparent; } }
+.success-visual { position: relative; width: 80px; height: 80px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;
+  .success-icon { font-size: 64px; color: #10b981; position: relative; z-index: 2; }
+  .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba(16, 185, 129, 0.2); animation: pulse 2s infinite; }
+}
+.summary-box { background: white; border-radius: 12px; padding: 24px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: inline-flex; gap: 40px; text-align: left;
+  .summary-item { display: flex; flex-direction: column; span { font-size: 12px; color: $text-sec; margin-bottom: 4px; } strong { font-size: 16px; color: $text-main; } }
+}
+
+/* --- Footer --- */
+.workflow-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid $border-color; padding: 16px 0; z-index: 100;
+  .footer-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; padding: 0 20px; align-items: center; }
+  .nav-btn { min-width: 120px; height: 44px; font-weight: 600;
+    &.primary { box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+    &.finish-btn { background: #10b981; border-color: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+  }
+}
+
+/* --- Animation --- */
 .slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1); }
 .slide-fade-enter-from { opacity: 0; transform: translateY(10px); }
 .slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }

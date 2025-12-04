@@ -192,4 +192,4 @@ const {
 } = usePackagingConfig()
 </script>
 
-<style scoped lang="scss" src="../styles/PackagingConfig.scss"> </style>
+<style scoped lang="scss" src="../styles/PackagingConfig.scss"></style>

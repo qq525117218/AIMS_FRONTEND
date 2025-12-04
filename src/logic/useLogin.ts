@@ -1,7 +1,7 @@
 import { reactive, ref } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 
-// 定义接口响应类型
+// 1. 定义接口响应类型 (匹配新JSON)
 export interface LoginResponse {
     code: number
     is_success: boolean
@@ -13,7 +13,6 @@ export interface LoginResponse {
     }
 }
 
-// 组合式函数
 export function useLogin(emit: (event: 'login-success', username: string) => void) {
     const formRef = ref<FormInstance>()
     const isLoading = ref(false)
@@ -36,7 +35,8 @@ export function useLogin(emit: (event: 'login-success', username: string) => voi
                 isLoading.value = true
 
                 try {
-                    const response = await fetch('/api/Auth/login', {
+                    // 2. 修改接口地址: /api/Auth/login -> /api/auth/login
+                    const response = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -50,12 +50,11 @@ export function useLogin(emit: (event: 'login-success', username: string) => voi
                     if (resData.code === 200 && resData.is_success) {
                         ElMessage.success(resData.message || '登录成功')
 
-                        // 存储 Token 和 用户信息
+                        // 存储 Token
                         localStorage.setItem('token', resData.data.token)
                         localStorage.setItem('username', loginForm.username)
                         localStorage.setItem('token_expire', resData.data.expire_at)
 
-                        // 触发回调
                         emit('login-success', loginForm.username)
                     } else {
                         ElMessage.error(resData.message || '登录失败，请检查账号密码')
