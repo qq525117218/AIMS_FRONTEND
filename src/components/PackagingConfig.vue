@@ -30,7 +30,7 @@
         <el-steps :active="activeStep" finish-status="success" align-center class="custom-steps">
           <el-step title="定义规格" icon="Box" />
           <el-step title="文案解析" icon="DocumentChecked" />
-          <el-step title="营销定义" icon="PriceTag" />
+          <el-step title="产品定义" icon="PriceTag" />
           <el-step title="构建交付" icon="Files" />
         </el-steps>
       </div>
@@ -95,20 +95,21 @@
             </div>
 
             <div v-else-if="activeStep === 2" key="step3" class="step-panel marketing-panel">
-              <div class="panel-header"><h2>营销与品牌定义</h2><p>确立产品的视觉基调与核心卖点。</p></div>
+              <div class="panel-header"><h2>产品定义</h2><p>确立产品的视觉基调与核心卖点。</p></div>
               <div class="panel-card">
-                <div class="form-section-block">
-                  <el-form-item prop="marketing.sku" class="brand-item">
-                    <div class="label-with-icon"><el-icon><Ticket /></el-icon> 商品编码 (SKU)</div>
-                    <el-input v-model="formData.marketing.sku" placeholder="例如：SKU-2024-X01" class="brand-input-lg" clearable />
-                  </el-form-item>
-                </div>
+
                 <div class="form-section-block">
                   <el-form-item prop="marketing.brand" class="brand-item">
                     <div class="label-with-icon"><el-icon><Trophy /></el-icon> 品牌名称 (Brand Name)</div>
                     <el-select v-model="formData.marketing.brand" placeholder="请选择品牌" class="brand-input-lg" filterable clearable>
                       <el-option v-for="item in brandOptions" :key="item.id" :label="item.name" :value="item.name" />
                     </el-select>
+                  </el-form-item>
+                </div>
+                <div class="form-section-block">
+                  <el-form-item prop="marketing.sku" class="brand-item">
+                    <div class="label-with-icon"><el-icon><Ticket /></el-icon> 商品编码 (SKU)</div>
+                    <el-input v-model="formData.marketing.sku" placeholder="例如：SKU-2024-X01" class="brand-input-lg" clearable />
                   </el-form-item>
                 </div>
                 <div class="form-section-block">

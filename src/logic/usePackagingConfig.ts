@@ -113,7 +113,18 @@ export function usePackagingConfig() {
             productName: '', ingredients: '', warnings: '', manufacturer: '',
             origin: '', shelfLife: '', address: '', directions: ''
         },
-        marketing: { sku: '', brand: '', capacityValue: '', capacityUnit: '', sellingPoints: [] }
+        marketing: {
+            sku: 'SKU00001636',
+            brand: 'WestMoon',
+            capacityValue: 'NET：100G/3.53 FL.OZ',
+            capacityUnit: '',
+            sellingPoints: [
+                'Professional-grade anti-fog solution.',
+                'Effective long-lasting anti-fog.',
+                'Versatile for multiple surfaces.',
+                'Safe reef-friendly ingredients.'
+            ]
+        }
     })
 
     const formData = reactive<WorkflowData>(getInitialData())
