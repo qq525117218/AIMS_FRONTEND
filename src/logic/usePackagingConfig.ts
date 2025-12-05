@@ -91,7 +91,7 @@ export function usePackagingConfig() {
     const activeStep = ref(0)
     const formRef = ref<FormInstance>()
     const isDocParsed = ref(false)
-    const fileName = ref('')
+    const fileName = ref('') // 这是上传文档的文件名
     const inputValue = ref('')
 
     // --- 状态管理 ---
@@ -103,6 +103,9 @@ export function usePackagingConfig() {
     // 下载链接状态
     const currentDownloadUrl = ref('')
     const currentTaskId = ref('')
+
+    // ✅ 新增：用于存储后端生成的最终 PSD 文件名
+    const generatedFileName = ref('')
 
     const brandOptions = ref<BrandItem[]>([])
 
@@ -161,6 +164,7 @@ export function usePackagingConfig() {
         Object.assign(formData, getInitialData())
         isDocParsed.value = false
         fileName.value = ''
+        generatedFileName.value = '' // 重置文件名
         activeStep.value = 0
         currentDownloadUrl.value = ''
         currentTaskId.value = ''
@@ -172,17 +176,10 @@ export function usePackagingConfig() {
             const reader = new FileReader()
             reader.readAsDataURL(file)
             reader.onload = () => {
-                // 1. 显式类型断言
                 const result = reader.result as string
-                // 2. 尝试提取 Base64 部分
                 const base64Content = result.split(',')[1]
-
-                // 3. 严谨判断：如果有值则 resolve，否则 reject
-                if (base64Content) {
-                    resolve(base64Content)
-                } else {
-                    reject(new Error('Failed to parse base64 content'))
-                }
+                if (base64Content) resolve(base64Content)
+                else reject(new Error('Failed to parse base64 content'))
             }
             reader.onerror = (error) => reject(error)
         })
@@ -284,7 +281,7 @@ export function usePackagingConfig() {
         }
     }
 
-    const pollProgress = async (taskId: string, token: string | null, fileName: string) => {
+    const pollProgress = async (taskId: string, token: string | null, defaultName: string) => {
         return new Promise<void>((resolve, reject) => {
             const timer = setInterval(async () => {
                 try {
@@ -303,8 +300,28 @@ export function usePackagingConfig() {
                         progressStatus.value = 'success'
                         progressMessage.value = '生成完成，即将下载...'
 
-                        const downloadUrl = `/api/design/download/${taskId}?fileName=${fileName}.psd`
+                        // 获取下载链接
+                        const downloadUrl = task.download_url
+                            ? task.download_url
+                            : `/api/design/download/${taskId}?fileName=${defaultName}.psd`
+
                         currentDownloadUrl.value = downloadUrl
+
+                        // ✅ 核心修复：解析下载链接中的 fileName 参数，获取后端生成的带时间戳的名称
+                        try {
+                            // 使用 window.location.origin 作为基准，防止相对路径报错
+                            const urlObj = new URL(downloadUrl, window.location.origin)
+                            const finalFileName = urlObj.searchParams.get('fileName')
+
+                            if (finalFileName) {
+                                generatedFileName.value = decodeURIComponent(finalFileName)
+                            } else {
+                                generatedFileName.value = `${defaultName}.psd`
+                            }
+                        } catch (e) {
+                            console.warn('解析文件名失败，使用默认值', e)
+                            generatedFileName.value = `${defaultName}.psd`
+                        }
 
                         await triggerDownload(downloadUrl)
 
@@ -335,6 +352,7 @@ export function usePackagingConfig() {
             const blobUrl = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = blobUrl
+            // 解析 URL 中的 fileName 参数
             const fileName = url.split('fileName=')[1] || 'design.psd'
             link.download = decodeURIComponent(fileName)
             document.body.appendChild(link)
@@ -361,7 +379,7 @@ export function usePackagingConfig() {
 
     return {
         activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
-        isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl,
+        isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl, generatedFileName, // 导出这个新变量
         nextStep, prevStep, resetWorkflow, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload
     }
 }

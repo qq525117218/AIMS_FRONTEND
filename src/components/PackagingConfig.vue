@@ -88,7 +88,7 @@
                     <div class="data-group"><label>地址 (Address)</label><div class="data-value">{{ formData.content.address || '-' }}</div></div>
                     <div class="data-group full"><label>成分表 (Ingredients)</label><div class="data-value text-block">{{ formData.content.ingredients || '-' }}</div></div>
                     <div class="data-group full"><label>使用方法 (Directions)</label><div class="data-value text-block">{{ formData.content.directions || '-' }}</div></div>
-                    <div class="data-group full"><label>警示语 (Warnings)</label><div class="data-value text-block warning">{{ formData.content.warnings || '-' }}</div></div>
+                    <div class="data-group full"><label>警示语 (Warnings)</label><div class="data-value text-block">{{ formData.content.warnings || '-' }}</div></div>
                   </div>
                 </div>
               </div>
@@ -160,10 +160,18 @@
             <div class="file-card">
               <el-icon class="file-icon"><Files /></el-icon>
               <div class="file-info">
-                <span class="fname">{{ formData.marketing.brand }}_{{ formData.marketing.sku }}.psd</span>
-                <span class="fstatus">Ready for Print</span>
+                <span class="fname">{{ generatedFileName || formData.marketing.brand + '_' + formData.marketing.sku + '.psd' }}</span>
               </div>
-              <el-button type="primary" link @click="triggerDownload(currentDownloadUrl)">重新下载</el-button>
+              <el-button
+                  class="re-download-btn"
+                  type="primary"
+                  plain
+                  round
+                  @click="triggerDownload(currentDownloadUrl)"
+              >
+                <el-icon style="margin-right: 4px"><Download /></el-icon>
+                重新下载
+              </el-button>
             </div>
 
             <div class="action-area">
@@ -239,7 +247,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, DataLine, Select, Files, MagicStick } from '@element-plus/icons-vue'
+import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, DataLine, Select, Files, MagicStick, Download } from '@element-plus/icons-vue'
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 
 defineProps<{ username: string }>()
@@ -247,7 +255,7 @@ defineEmits(['logout'])
 
 const {
   activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
-  isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl,
+  isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl, generatedFileName,
   nextStep, prevStep, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload, resetWorkflow
 } = usePackagingConfig()
 </script>
