@@ -108,7 +108,7 @@ export function usePackagingConfig() {
 
 
     const getInitialData = (): WorkflowData => ({
-        dimensions: { length: 6, width: 12, height: 6, bleedX: 0.5, bleedY: 2, bleedInner: 0.15 },
+        dimensions: { length: 6, width: 6, height: 12, bleedX: 0.5, bleedY: 2, bleedInner: 0.15 },
         content: {
             productName: '', ingredients: '', warnings: '', manufacturer: '',
             origin: '', shelfLife: '', address: '', directions: ''

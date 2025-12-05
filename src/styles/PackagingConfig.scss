@@ -86,9 +86,41 @@ $success-color: #10b981;
 
 .steps-container {
   margin-bottom: 20px;
-  :deep(.el-step__title) { font-size: 13px; font-weight: 500; }
-  :deep(.el-step__head.is-success) { color: $primary-color; border-color: $primary-color; }
-  :deep(.el-step__title.is-success) { color: $text-main; }
+
+  :deep(.el-step__title) {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* 已完成步骤的样式 (Success) */
+  :deep(.el-step__head.is-success) {
+    color: $primary-color;
+    border-color: $primary-color;
+  }
+  :deep(.el-step__title.is-success) {
+    color: $text-main;
+  }
+
+  /* --- 新增：当前正在进行步骤的样式 (Active/Process) --- */
+  :deep(.el-step__head.is-process) {
+    color: $primary-color;
+    border-color: $primary-color;
+
+    .el-step__icon {
+      background-color: #eff6ff; /* 浅蓝色背景 */
+      transform: scale(1.15);    /*稍微放大图标 */
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); /* 添加一圈光晕效果 */
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+  }
+
+  :deep(.el-step__title.is-process) {
+    color: $primary-color; /* 文字变蓝 */
+    font-weight: 700;      /* 文字加粗 */
+    transform: scale(1.05); /* 文字轻微放大 */
+    transition: all 0.3s ease;
+  }
 }
 
 .panel-header {
