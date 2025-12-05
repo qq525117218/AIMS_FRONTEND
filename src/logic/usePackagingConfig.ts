@@ -1,7 +1,7 @@
 import { reactive, ref } from 'vue'
 import { ElMessage, ElLoading, type FormInstance, type FormRules, type UploadFile } from 'element-plus'
 
-// 前端使用的驼峰命名接口
+// --- 接口定义 ---
 export interface Dimensions { length: number; width: number; height: number; bleedX: number; bleedY: number; bleedInner: number; }
 export interface Content {
     productName: string;
@@ -21,7 +21,7 @@ export interface WorkflowData {
     marketing: Marketing;
 }
 
-// 后端返回的 JSON 结构定义 (用于文档解析)
+// 文档解析响应
 interface ParseDocResponse {
     code: number
     is_success: boolean
@@ -43,7 +43,7 @@ interface ParseDocResponse {
     }
 }
 
-// --- 品牌接口定义 ---
+// 品牌信息
 export interface BrandItem {
     id: number
     code: string
@@ -65,25 +65,58 @@ interface BrandListResponse {
     }
 }
 
+// 任务状态
+interface PsdTaskStatus {
+    task_id: string
+    progress: number
+    status: 'Pending' | 'Processing' | 'Completed' | 'Failed'
+    message: string
+    download_url?: string
+}
+
+interface AsyncSubmitResponse {
+    code: number
+    is_success: boolean
+    message: string
+    data: string // taskId
+}
+
+interface ProgressResponse {
+    code: number
+    is_success: boolean
+    data: PsdTaskStatus
+}
+
 export function usePackagingConfig() {
     const activeStep = ref(0)
     const formRef = ref<FormInstance>()
     const isDocParsed = ref(false)
     const fileName = ref('')
-    const loading = ref(false)
     const inputValue = ref('')
 
-    // --- 品牌列表数据 ---
+    // --- 状态管理 ---
+    const isGenerating = ref(false)
+    const progressPercentage = ref(0)
+    const progressStatus = ref('')
+    const progressMessage = ref('准备提交任务...')
+
+    // 下载链接状态
+    const currentDownloadUrl = ref('')
+    const currentTaskId = ref('')
+
     const brandOptions = ref<BrandItem[]>([])
 
-    const formData = reactive<WorkflowData>({
-        dimensions: { length: 0, width: 0, height: 0, bleedX: 3, bleedY: 3, bleedInner: 3 },
+
+    const getInitialData = (): WorkflowData => ({
+        dimensions: { length: 6, width: 12, height: 6, bleedX: 0.5, bleedY: 2, bleedInner: 0.15 },
         content: {
             productName: '', ingredients: '', warnings: '', manufacturer: '',
             origin: '', shelfLife: '', address: '', directions: ''
         },
         marketing: { sku: '', brand: '', capacityValue: '', capacityUnit: '', sellingPoints: [] }
     })
+
+    const formData = reactive<WorkflowData>(getInitialData())
 
     const rules = reactive<FormRules>({
         'dimensions.length': [{ required: true, message: 'Required', trigger: 'blur' }],
@@ -95,6 +128,7 @@ export function usePackagingConfig() {
         'marketing.capacityValue': [{ required: true, message: '请输入规格', trigger: 'blur' }]
     })
 
+    // --- 流程控制 ---
     const nextStep = async () => {
         if (!formRef.value) return;
         let fields: string[] = []
@@ -111,40 +145,51 @@ export function usePackagingConfig() {
 
     const prevStep = () => { if (activeStep.value > 0) activeStep.value-- }
 
+    // 重置工作流
+    const resetWorkflow = () => {
+        Object.assign(formData, getInitialData())
+        isDocParsed.value = false
+        fileName.value = ''
+        activeStep.value = 0
+        currentDownloadUrl.value = ''
+        currentTaskId.value = ''
+    }
+
+    // --- 文件处理 ---
     const fileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader()
             reader.readAsDataURL(file)
-            reader.onload = () => resolve((reader.result as string).split(',')[1])
+            reader.onload = () => {
+                // 1. 显式类型断言
+                const result = reader.result as string
+                // 2. 尝试提取 Base64 部分
+                const base64Content = result.split(',')[1]
+
+                // 3. 严谨判断：如果有值则 resolve，否则 reject
+                if (base64Content) {
+                    resolve(base64Content)
+                } else {
+                    reject(new Error('Failed to parse base64 content'))
+                }
+            }
             reader.onerror = (error) => reject(error)
         })
     }
 
     const handleFileUpload = async (file: UploadFile) => {
         if (!file.raw) return
-
-        const loadingInstance = ElLoading.service({
-            text: 'AI 解析中 (Reading Document)...',
-            background: 'rgba(255,255,255,0.8)'
-        })
-
+        const loadingInstance = ElLoading.service({ text: 'AI 解析中...', background: 'rgba(255,255,255,0.8)' })
         try {
             const base64String = await fileToBase64(file.raw)
-
             const response = await fetch('/api/document/parse/word', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    file_name: file.name,
-                    file_content_base64: base64String
-                })
+                body: JSON.stringify({ file_name: file.name, file_content_base64: base64String })
             })
-
             const resData = (await response.json()) as ParseDocResponse
-
             if (response.ok && resData.code === 200 && resData.is_success && resData.data) {
                 const parsed = resData.data.content
-
                 Object.assign(formData.content, {
                     productName: parsed.product_name || '',
                     manufacturer: parsed.manufacturer || '',
@@ -153,199 +198,159 @@ export function usePackagingConfig() {
                     shelfLife: parsed.shelf_life || '',
                     address: parsed.address || '',
                     directions: parsed.directions || '',
-                    ingredients: parsed.ingredients?.raw_text ||
-                        (parsed.ingredients?.active_ingredients ? `Active: ${parsed.ingredients.active_ingredients}\n` : '') +
-                        (parsed.ingredients?.inactive_ingredients ? `Inactive: ${parsed.ingredients.inactive_ingredients}` : '')
+                    ingredients: parsed.ingredients?.raw_text || (parsed.ingredients?.active_ingredients ? `Active: ${parsed.ingredients.active_ingredients}\n` : '') + (parsed.ingredients?.inactive_ingredients ? `Inactive: ${parsed.ingredients.inactive_ingredients}` : '')
                 })
-
                 fileName.value = file.name
                 isDocParsed.value = true
-                ElMessage.success('解析成功：文案已自动填充')
-            } else {
-                throw new Error('解析失败')
-            }
+                ElMessage.success('解析成功')
+            } else { throw new Error('解析失败') }
         } catch (error: any) {
-            console.error(error)
             ElMessage.error(error.message || '解析异常')
             isDocParsed.value = false
-            fileName.value = ''
-        } finally {
-            loadingInstance.close()
-        }
+        } finally { loadingInstance.close() }
     }
 
+    // --- 标签处理 ---
     const handleCloseTag = (tag: string) => {
         formData.marketing.sellingPoints.splice(formData.marketing.sellingPoints.indexOf(tag), 1)
     }
-
     const handleInputConfirm = () => {
         if (inputValue.value) {
-            formData.marketing.sellingPoints.push(inputValue.value)
-            inputValue.value = ''
+            formData.marketing.sellingPoints.push(inputValue.value); inputValue.value = ''
         }
     }
-
     const addQuickTag = (tag: string) => {
-        if (!formData.marketing.sellingPoints.includes(tag)) {
-            formData.marketing.sellingPoints.push(tag)
-        }
+        if (!formData.marketing.sellingPoints.includes(tag)) formData.marketing.sellingPoints.push(tag)
     }
 
-    // --- 修改：PSD 生成与下载逻辑 ---
+    // --- PSD 生成逻辑 ---
     const handleGeneratePSD = async () => {
-        loading.value = true
+        isGenerating.value = true
+        progressPercentage.value = 0
+        progressStatus.value = ''
+        progressMessage.value = '正在提交生成任务...'
+
         try {
             const token = localStorage.getItem('token')
             const username = localStorage.getItem('username') || 'User'
-
-            // 1. 构造 Payload (对应后端 PsdRequestDto)
             const payload = {
                 project_name: `${formData.marketing.brand}_${formData.marketing.sku}`.replace(/\s+/g, '_'),
-                user_context: {
-                    username: username,
-                    generate_dieline: true
-                },
+                user_context: { username: username, generate_dieline: true },
                 specifications: {
-                    dimensions: {
-                        length: formData.dimensions.length,
-                        width: formData.dimensions.width,
-                        height: formData.dimensions.height
-                    },
-                    print_config: {
-                        bleed_x: formData.dimensions.bleedX,
-                        bleed_y: formData.dimensions.bleedY,
-                        bleed_inner: formData.dimensions.bleedInner,
-                        resolution_dpi: 300
-                    }
+                    dimensions: formData.dimensions,
+                    print_config: { bleed_x: formData.dimensions.bleedX, bleed_y: formData.dimensions.bleedY, bleed_inner: formData.dimensions.bleedInner, resolution_dpi: 300 }
                 },
                 assets: {
                     texts: {
-                        main_panel: {
-                            brand_name: formData.marketing.brand,
-                            product_name: formData.content.productName,
-                            capacity_info: formData.marketing.capacityValue,
-                            selling_points: formData.marketing.sellingPoints
-                        },
-                        info_panel: {
-                            ingredients: formData.content.ingredients,
-                            manufacturer: formData.content.manufacturer,
-                            origin: formData.content.origin,
-                            warnings: formData.content.warnings,
-                            directions: formData.content.directions,
-                            address: formData.content.address
-                        }
+                        main_panel: { brand_name: formData.marketing.brand, product_name: formData.content.productName, capacity_info: formData.marketing.capacityValue, selling_points: formData.marketing.sellingPoints },
+                        info_panel: { ingredients: formData.content.ingredients, manufacturer: formData.content.manufacturer, origin: formData.content.origin, warnings: formData.content.warnings, directions: formData.content.directions, address: formData.content.address }
                     },
-                    dynamic_images: {
-                        barcode: {
-                            value: formData.marketing.sku,
-                            type: 'EAN-13'
-                        }
-                    }
+                    dynamic_images: { barcode: { value: formData.marketing.sku, type: 'EAN-13' } }
                 }
             }
 
-            // 2. 发起请求
-            const response = await fetch('/api/design/generate/psd', {
+            const submitRes = await fetch('/api/design/generate/psd/async', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token ? `Bearer ${token}` : ''
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' },
                 body: JSON.stringify(payload)
             })
 
-            // 3. 错误处理 (如果是 JSON 错误响应)
-            const contentType = response.headers.get('content-type')
-            if (!response.ok) {
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json()
-                    throw new Error(errorData.message || '生成请求被拒绝')
-                } else {
-                    throw new Error(`服务器错误: ${response.status}`)
-                }
-            }
+            if (!submitRes.ok) throw new Error(`提交失败: ${submitRes.status}`)
+            const submitData = (await submitRes.json()) as AsyncSubmitResponse
+            if (!submitData.is_success) throw new Error(submitData.message)
 
-            // 4. 处理 Blob 并下载
-            const blob = await response.blob()
-            if (blob.size === 0) throw new Error('生成的文件内容为空')
+            const taskId = submitData.data
+            currentTaskId.value = taskId
 
-            // 创建下载链接
-            const url = window.URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-
-            // 尝试获取文件名
-            const contentDisposition = response.headers.get('Content-Disposition')
-            let downloadName = `${payload.project_name}.psd`
-            if (contentDisposition) {
-                const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
-                if (fileNameMatch != null && fileNameMatch[1]) {
-                    downloadName = fileNameMatch[1].replace(/['"]/g, '')
-                }
-            }
-
-            link.setAttribute('download', downloadName)
-            document.body.appendChild(link)
-            link.click()
-
-            // 清理
-            document.body.removeChild(link)
-            window.URL.revokeObjectURL(url)
-
-            ElMessage.success('PSD 文件生成成功，正在下载...')
+            await pollProgress(taskId, token, payload.project_name)
 
         } catch (error: any) {
-            console.error('Generate PSD Failed:', error)
-            ElMessage.error(error.message || '生成 PSD 失败，请稍后重试')
-        } finally {
-            loading.value = false
+            console.error('Task Failed:', error)
+            progressStatus.value = 'exception'
+            progressMessage.value = `错误: ${error.message || '未知错误'}`
+            ElMessage.error('生成失败')
+            setTimeout(() => { isGenerating.value = false }, 3000)
         }
     }
 
-    // --- 获取品牌列表逻辑 ---
-    const fetchBrandList = async () => {
+    const pollProgress = async (taskId: string, token: string | null, fileName: string) => {
+        return new Promise<void>((resolve, reject) => {
+            const timer = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/design/progress/${taskId}`, {
+                        headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+                    })
+                    if (!res.ok) throw new Error('无法获取任务进度')
+                    const resData = (await res.json()) as ProgressResponse
+                    const task = resData.data
+
+                    progressPercentage.value = task.progress
+                    progressMessage.value = task.message || '正在处理...'
+
+                    if (task.status === 'Completed') {
+                        clearInterval(timer)
+                        progressStatus.value = 'success'
+                        progressMessage.value = '生成完成，即将下载...'
+
+                        const downloadUrl = `/api/design/download/${taskId}?fileName=${fileName}.psd`
+                        currentDownloadUrl.value = downloadUrl
+
+                        await triggerDownload(downloadUrl)
+
+                        setTimeout(() => {
+                            isGenerating.value = false
+                            activeStep.value = 4
+                            resolve()
+                        }, 1000)
+                    }
+                    else if (task.status === 'Failed') {
+                        clearInterval(timer)
+                        throw new Error(task.message || '生成失败')
+                    }
+                } catch (err) {
+                    clearInterval(timer)
+                    reject(err)
+                }
+            }, 1000)
+        })
+    }
+
+    const triggerDownload = async (url: string) => {
         try {
             const token = localStorage.getItem('token')
-            const response = await fetch('/api/plm/brand/list', {
-                method: 'GET',
-                headers: {
-                    'Authorization': token ? `Bearer ${token}` : ''
-                }
-            })
-
-            if (!response.ok) return
-
-            const text = await response.text();
-            if (!text) return;
-
-            const resData = JSON.parse(text) as BrandListResponse
-
-            if (resData.code === 200 && resData.is_success) {
-                brandOptions.value = resData.data.plm_brand_data
-            }
-        } catch (error) {
-            console.error('Failed to fetch brand list:', error)
+            const res = await fetch(url, { headers: { 'Authorization': token ? `Bearer ${token}` : '' } })
+            if(!res.ok) throw new Error('Download Failed')
+            const blob = await res.blob()
+            const blobUrl = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = blobUrl
+            const fileName = url.split('fileName=')[1] || 'design.psd'
+            link.download = decodeURIComponent(fileName)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(blobUrl)
+            ElMessage.success('下载已开始')
+        } catch (e) {
+            console.error(e)
+            ElMessage.error('自动下载失败，请点击按钮手动下载')
         }
     }
 
+    const fetchBrandList = async () => {
+        const token = localStorage.getItem('token')
+        if(!token) return
+        try {
+            const response = await fetch('/api/plm/brand/list', { headers: { 'Authorization': `Bearer ${token}` } })
+            const resData = await response.json() as BrandListResponse
+            if (resData.is_success) brandOptions.value = resData.data.plm_brand_data
+        } catch (e) { console.error(e) }
+    }
     fetchBrandList()
 
     return {
-        activeStep,
-        formRef,
-        formData,
-        rules,
-        isDocParsed,
-        fileName,
-        loading,
-        inputValue,
-        brandOptions,
-        nextStep,
-        prevStep,
-        handleFileUpload,
-        handleCloseTag,
-        handleInputConfirm,
-        addQuickTag,
-        handleGeneratePSD
+        activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
+        isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl,
+        nextStep, prevStep, resetWorkflow, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload
     }
 }

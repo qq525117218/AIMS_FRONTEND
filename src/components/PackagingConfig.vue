@@ -37,6 +37,7 @@
 
       <div class="workspace-container">
         <el-form
+            v-if="activeStep < 4"
             ref="formRef"
             :model="formData"
             :rules="rules"
@@ -51,11 +52,11 @@
               <div class="panel-card">
                 <div class="section-label">基础尺寸 (Dimension)</div>
                 <div class="dimension-grid">
-                  <div class="dim-item"><span class="dim-bg-icon">L</span><el-form-item prop="dimensions.length"><el-input-number v-model="formData.dimensions.length" :min="0" :controls="false" placeholder="0.00" /><span class="unit">mm</span></el-form-item><span class="dim-name">长度 Length</span></div>
+                  <div class="dim-item"><span class="dim-bg-icon">L</span><el-form-item prop="dimensions.length"><el-input-number v-model="formData.dimensions.length" :min="0" :controls="false" placeholder="0.00" /><span class="unit">cm</span></el-form-item><span class="dim-name">长度 Length</span></div>
                   <div class="dim-separator">×</div>
-                  <div class="dim-item"><span class="dim-bg-icon">W</span><el-form-item prop="dimensions.width"><el-input-number v-model="formData.dimensions.width" :min="0" :controls="false" placeholder="0.00" /><span class="unit">mm</span></el-form-item><span class="dim-name">宽度 Width</span></div>
+                  <div class="dim-item"><span class="dim-bg-icon">W</span><el-form-item prop="dimensions.width"><el-input-number v-model="formData.dimensions.width" :min="0" :controls="false" placeholder="0.00" /><span class="unit">cm</span></el-form-item><span class="dim-name">宽度 Width</span></div>
                   <div class="dim-separator">×</div>
-                  <div class="dim-item"><span class="dim-bg-icon">H</span><el-form-item prop="dimensions.height"><el-input-number v-model="formData.dimensions.height" :min="0" :controls="false" placeholder="0.00" /><span class="unit">mm</span></el-form-item><span class="dim-name">高度 Height</span></div>
+                  <div class="dim-item"><span class="dim-bg-icon">H</span><el-form-item prop="dimensions.height"><el-input-number v-model="formData.dimensions.height" :min="0" :controls="false" placeholder="0.00" /><span class="unit">cm</span></el-form-item><span class="dim-name">高度 Height</span></div>
                 </div>
                 <el-divider class="custom-divider" />
                 <div class="section-label">印刷工艺 (Bleed & Safety)</div>
@@ -102,30 +103,18 @@
                     <el-input v-model="formData.marketing.sku" placeholder="例如：SKU-2024-X01" class="brand-input-lg" clearable />
                   </el-form-item>
                 </div>
-
                 <div class="form-section-block">
                   <el-form-item prop="marketing.brand" class="brand-item">
                     <div class="label-with-icon"><el-icon><Trophy /></el-icon> 品牌名称 (Brand Name)</div>
-                    <el-select
-                        v-model="formData.marketing.brand"
-                        placeholder="请选择品牌 / Select Brand"
-                        class="brand-input-lg"
-                        filterable
-                        clearable
-                    >
-                      <el-option
-                          v-for="item in brandOptions"
-                          :key="item.id"
-                          :label="item.name"
-                          :value="item.name"
-                      />
+                    <el-select v-model="formData.marketing.brand" placeholder="请选择品牌" class="brand-input-lg" filterable clearable>
+                      <el-option v-for="item in brandOptions" :key="item.id" :label="item.name" :value="item.name" />
                     </el-select>
                   </el-form-item>
                 </div>
                 <div class="form-section-block">
                   <el-form-item prop="marketing.capacityValue" class="brand-item">
                     <div class="label-with-icon"><el-icon><DataLine /></el-icon> 规格详情 (Spec)</div>
-                    <el-input v-model="formData.marketing.capacityValue" placeholder="例如：500ml, 250g, 12 packs..." class="brand-input-lg" clearable />
+                    <el-input v-model="formData.marketing.capacityValue" placeholder="例如：500ml" class="brand-input-lg" clearable />
                   </el-form-item>
                 </div>
                 <div class="form-section-block">
@@ -141,7 +130,6 @@
                         <span class="q-tag" @click="addQuickTag('Eco-Friendly')">Eco-Friendly</span>
                         <span class="q-tag" @click="addQuickTag('Organic')">Organic</span>
                         <span class="q-tag" @click="addQuickTag('Premium')">Premium</span>
-                        <span class="q-tag" @click="addQuickTag('New Formula')">New Formula</span>
                       </div>
                     </div>
                   </el-form-item>
@@ -159,51 +147,107 @@
                 <div class="summary-item"><span>尺寸</span><strong>{{ formData.dimensions.length }} x {{ formData.dimensions.width }} x {{ formData.dimensions.height }}</strong></div>
               </div>
             </div>
-
           </transition>
         </el-form>
+
+        <transition name="slide-fade" mode="out-in">
+          <div v-if="activeStep === 4" key="step5" class="success-page">
+            <div class="success-banner"><el-icon><Select /></el-icon></div>
+            <h2>生成任务已完成！</h2>
+            <p class="sub-msg">PSD 工程文件已自动下载到您的本地。</p>
+
+            <div class="file-card">
+              <el-icon class="file-icon"><Files /></el-icon>
+              <div class="file-info">
+                <span class="fname">{{ formData.marketing.brand }}_{{ formData.marketing.sku }}.psd</span>
+                <span class="fstatus">Ready for Print</span>
+              </div>
+              <el-button type="primary" link @click="triggerDownload(currentDownloadUrl)">重新下载</el-button>
+            </div>
+
+            <div class="action-area">
+              <el-button class="btn-lg" @click="resetWorkflow">新建项目</el-button>
+              <el-button class="btn-lg" type="primary" plain @click="activeStep = 0">查看详情</el-button>
+            </div>
+          </div>
+        </transition>
       </div>
 
-      <footer class="workflow-footer">
+      <footer class="workflow-footer" v-if="activeStep < 4">
         <div class="footer-inner">
           <el-button v-if="activeStep > 0" @click="prevStep" plain round class="nav-btn">上一步</el-button>
           <div class="spacer"></div>
           <el-button v-if="activeStep < 3" type="primary" @click="nextStep" round class="nav-btn primary">下一步</el-button>
-          <el-button v-if="activeStep === 3" type="primary" @click="handleGeneratePSD" round class="nav-btn finish-btn" :loading="loading">生成 PSD 文件</el-button>
+
+          <el-button
+              v-if="activeStep === 3"
+              type="primary"
+              @click="handleGeneratePSD"
+              round
+              class="nav-btn finish-btn"
+              :disabled="isGenerating"
+          >
+            {{ isGenerating ? '生成中...' : '生成 PSD 文件' }}
+          </el-button>
         </div>
       </footer>
     </div>
+
+    <el-dialog
+        v-model="isGenerating"
+        :show-close="false"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        width="380px"
+        align-center
+        class="design-gen-dialog"
+    >
+      <template #header>
+        <div class="dialog-header-custom">
+          <div class="icon-pulse">
+            <el-icon><MagicStick /></el-icon> </div>
+          <span class="header-title">正在生成设计文件</span>
+        </div>
+      </template>
+
+      <div class="progress-dialog-content">
+        <div class="progress-ring-wrapper">
+          <el-progress
+              type="circle"
+              :percentage="progressPercentage"
+              :status="progressStatus as any"
+              :width="150"
+              :stroke-width="10"
+              color="#2563eb"
+              :show-text="false"
+              stroke-linecap="round"
+          />
+          <div class="ring-inner-text">
+            <span class="number">{{ progressPercentage }}</span>
+            <span class="symbol">%</span>
+          </div>
+        </div>
+        <div class="status-box">
+          <p class="status-main">{{ progressStatus === 'success' ? '生成成功' : '处理中...' }}</p>
+          <p class="status-sub">{{ progressMessage }}</p>
+        </div>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script lang="ts" setup>
-import {  DocumentAdd, DocumentChecked, Trophy, Ticket,  CircleCheckFilled, DataLine } from '@element-plus/icons-vue'
+import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, DataLine, Select, Files, MagicStick } from '@element-plus/icons-vue'
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 
-defineProps<{
-  username: string
-}>()
-
+defineProps<{ username: string }>()
 defineEmits(['logout'])
 
-// 引入逻辑 Hook
 const {
-  activeStep,
-  formRef,
-  formData,
-  rules,
-  isDocParsed,
-  fileName,
-  loading,
-  inputValue,
-  brandOptions, // Added: destructured brandOptions
-  nextStep,
-  prevStep,
-  handleFileUpload,
-  handleCloseTag,
-  handleInputConfirm,
-  addQuickTag,
-  handleGeneratePSD
+  activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
+  isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl,
+  nextStep, prevStep, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload, resetWorkflow
 } = usePackagingConfig()
 </script>
 

@@ -1,3 +1,5 @@
+/* src/styles/PackagingConfig.scss */
+
 /* --- 全局变量 --- */
 $primary-color: #2563eb;
 $bg-color: #f8fafc;
@@ -5,6 +7,7 @@ $card-bg: #ffffff;
 $text-main: #1e293b;
 $text-sec: #64748b;
 $border-color: #e2e8f0;
+$success-color: #10b981;
 
 .workflow-page {
   background-color: $bg-color;
@@ -44,7 +47,7 @@ $border-color: #e2e8f0;
   .logo-box {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: linear-gradient(135deg, #2563eb, #550aa6);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -67,8 +70,7 @@ $border-color: #e2e8f0;
   gap: 12px;
   cursor: pointer;
   .welcome-text { font-size: 14px; font-weight: 500; color: #475569; }
-  .avatar-wrapper { outline: none; }
-  .user-avatar { background: #2563eb; color: white; font-weight: 600; font-size: 14px; transition: transform 0.2s; &:hover { transform: scale(1.05); } }
+  .user-avatar { background: $primary-color; color: white; font-weight: 600; font-size: 14px; transition: transform 0.2s; &:hover { transform: scale(1.05); } }
 }
 
 /* --- Body --- */
@@ -114,6 +116,14 @@ $border-color: #e2e8f0;
   letter-spacing: 0.5px;
 }
 
+/* --- Form Elements --- */
+.form-section-block { margin-bottom: 30px; width: 100%; }
+.brand-item {
+  margin-bottom: 0;
+  .label-with-icon { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; .el-icon { color: #d97706; } }
+  .brand-input-lg :deep(.el-input__wrapper) { padding: 8px 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0 inset; background: #fff; font-size: 18px; font-weight: 700; }
+}
+
 /* --- STEP 1: Dimensions --- */
 .dimension-grid {
   display: flex;
@@ -123,39 +133,25 @@ $border-color: #e2e8f0;
   padding: 24px;
   border-radius: 12px;
   margin-bottom: 24px;
-
-  &.bleed-theme {
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-  }
+  &.bleed-theme { background: #f8fafc; border: 1px dashed #cbd5e1; }
 }
-
 .dim-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
   position: relative;
-
-  .dim-bg-icon {
-    font-weight: 800;
-    color: #cbd5e1;
-    font-size: 24px;
-    margin-bottom: 8px;
-    font-family: monospace;
-  }
+  .dim-bg-icon { font-weight: 800; color: #cbd5e1; font-size: 24px; margin-bottom: 8px; font-family: monospace; }
   :deep(.el-input-number) { width: 100%; max-width: 120px; }
   :deep(.el-input__wrapper) { background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.03); border-radius: 8px; padding: 0 10px; }
   :deep(.el-input__inner) { text-align: center; font-weight: 600; font-size: 18px; }
   .unit { position: absolute; right: 20px; bottom: 28px; font-size: 12px; color: #94a3b8; pointer-events: none; }
   .dim-name { margin-top: 8px; font-size: 12px; color: $text-sec; }
 }
-
 .dim-separator {
   font-size: 24px; color: #cbd5e1; margin: 0 10px; padding-bottom: 20px;
   &.plus { font-size: 20px; color: #94a3b8; }
 }
-
 .custom-divider { margin: 32px 0; border-top: 1px dashed $border-color; }
 
 /* --- STEP 2: Document --- */
@@ -186,23 +182,9 @@ $border-color: #e2e8f0;
   }
 }
 
-/* --- STEP 3: Marketing Optimization --- */
-.form-section-block {
-  margin-bottom: 30px; /* 模块间距 */
-  width: 100%;
-}
-
-.brand-item {
-  margin-bottom: 0; /* 清除默认 margin */
-  .label-with-icon { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; .el-icon { color: #d97706; } }
-  .brand-input-lg :deep(.el-input__wrapper) { padding: 8px 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0 inset; background: #fff; font-size: 18px; font-weight: 700; }
-}
-
-/* 卖点标签 (强制100%宽) */
+/* --- STEP 3: Tags --- */
 .tags-wrapper.enhanced.full-width-tags {
-  width: 100%;
-  box-sizing: border-box; /* 确保 padding 包含在宽度内 */
-  background: #fff; border: 1px solid $border-color; border-radius: 8px; padding: 12px; min-height: 120px; display: flex; flex-direction: column; transition: all 0.3s;
+  width: 100%; box-sizing: border-box; background: #fff; border: 1px solid $border-color; border-radius: 8px; padding: 12px; min-height: 120px; display: flex; flex-direction: column; transition: all 0.3s;
   &:focus-within { border-color: $primary-color; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
   .tags-list { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; align-content: flex-start; }
   .new-tag-input { width: 120px; :deep(.el-input__wrapper) { box-shadow: none; padding: 0; background: transparent; } }
@@ -212,14 +194,137 @@ $border-color: #e2e8f0;
   }
 }
 
-/* --- STEP 4: Success --- */
+/* --- STEP 4: Ready State --- */
 .centered-panel { text-align: center; .panel-card { border: none; box-shadow: none; background: transparent; } }
 .success-visual { position: relative; width: 80px; height: 80px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;
-  .success-icon { font-size: 64px; color: #10b981; position: relative; z-index: 2; }
-  .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba(16, 185, 129, 0.2); animation: pulse 2s infinite; }
+  .success-icon { font-size: 64px; color: $success-color; position: relative; z-index: 2; }
+  .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba($success-color, 0.2); animation: pulse 2s infinite; }
 }
 .summary-box { background: white; border-radius: 12px; padding: 24px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: inline-flex; gap: 40px; text-align: left;
   .summary-item { display: flex; flex-direction: column; span { font-size: 12px; color: $text-sec; margin-bottom: 4px; } strong { font-size: 16px; color: $text-main; } }
+}
+
+/* --- STEP 5: Success/Completion Page --- */
+.success-page {
+  text-align: center;
+  padding: 40px 20px;
+  animation: slideUp 0.5s ease-out;
+
+  .success-banner {
+    width: 120px;
+    height: 120px;
+    background: #ecfdf5;
+    border-radius: 50%;
+    margin: 0 auto 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $success-color;
+    font-size: 60px;
+    box-shadow: 0 10px 30px -10px rgba($success-color, 0.3);
+  }
+
+  h2 { font-size: 32px; color: $text-main; margin: 0 0 10px 0; font-weight: 800; letter-spacing: -1px; }
+  .sub-msg { font-size: 16px; color: $text-sec; margin-bottom: 40px; }
+
+  .file-card {
+    background: white;
+    border: 1px solid $border-color;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 400px;
+    margin: 0 auto 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    &:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-color: $primary-color; }
+
+    .file-icon { font-size: 40px; color: #2563eb; }
+    .file-info {
+      text-align: left;
+      flex: 1;
+      .fname { display: block; font-weight: 700; color: $text-main; margin-bottom: 4px; font-size: 15px; }
+      .fstatus { font-size: 12px; color: $success-color; background: #ecfdf5; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 600; }
+    }
+  }
+
+  .action-area {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    .btn-lg { width: 160px; height: 48px; font-size: 15px; font-weight: 600; border-radius: 10px; }
+  }
+}
+
+/* --- ✅ Progress Dialog Styles (Modernized) --- */
+.design-gen-dialog {
+  border-radius: 24px !important;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+
+  // 覆盖 Element Dialog 默认 Header
+  :deep(.el-dialog__header) {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid $border-color;
+  }
+  :deep(.el-dialog__body) {
+    padding: 0;
+  }
+}
+
+.dialog-header-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  background: #f8fafc;
+
+  .icon-pulse {
+    color: $primary-color;
+    font-size: 20px;
+    animation: spin 3s linear infinite; // 旋转动效
+  }
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: $text-main;
+    letter-spacing: 0.5px;
+  }
+}
+
+.progress-dialog-content {
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  .progress-ring-wrapper {
+    position: relative;
+    margin-bottom: 24px;
+
+    .ring-inner-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+
+      .number { font-size: 36px; font-weight: 800; color: $text-main; line-height: 1; letter-spacing: -1px; }
+      .symbol { font-size: 14px; font-weight: 600; color: $text-sec; margin-left: 2px; }
+    }
+  }
+
+  .status-box {
+    .status-main { font-size: 18px; font-weight: 700; color: $text-main; margin: 0 0 6px 0; }
+    .status-sub { font-size: 13px; color: $text-sec; margin: 0; }
+  }
 }
 
 /* --- Footer --- */
@@ -227,12 +332,14 @@ $border-color: #e2e8f0;
   .footer-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; padding: 0 20px; align-items: center; }
   .nav-btn { min-width: 120px; height: 44px; font-weight: 600;
     &.primary { box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
-    &.finish-btn { background: #10b981; border-color: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+    &.finish-btn { background: $success-color; border-color: $success-color; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
   }
 }
 
 /* --- Animation --- */
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1); }
 .slide-fade-enter-from { opacity: 0; transform: translateY(10px); }
 .slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }
-@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
