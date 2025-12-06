@@ -269,17 +269,244 @@ $success-color: #10b981;
   }
 }
 
-/* --- 8. 步骤三：营销标签 (Step 3) --- */
-.tags-wrapper.enhanced.full-width-tags {
-  width: 100%; box-sizing: border-box; background: #fff; border: 1px solid $border-color; border-radius: 8px; padding: 12px; min-height: 120px; display: flex; flex-direction: column; transition: all 0.3s;
-  &:focus-within { border-color: $primary-color; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
-  .tags-list { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; align-content: flex-start; }
-  .new-tag-input { width: 120px; :deep(.el-input__wrapper) { box-shadow: none; padding: 0; background: transparent; } }
-  .quick-tags {
-    margin-top: 10px; padding-top: 10px; border-top: 1px dashed $border-color; font-size: 12px; color: #94a3b8; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-    .q-tag { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; &:hover { background: #e2e8f0; color: #475569; } }
+/* --- 8. 步骤三：产品定义 (Step 3 - Redesigned) --- */
+
+.product-definition-container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.section-title-sm {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+/* 垂直堆叠布局 */
+.field-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 卡片之间的垂直间距 */
+}
+
+/* 统一的卡片输入框样式 */
+.field-card {
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0;
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+  height: 80px; /* ✅ 核心修改：固定高度确保三者一致 */
+  width: 100%; /* ✅ 核心修改：宽度统一撑满 */
+
+  /* 卡片 Hover 效果 */
+  &:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  /* 输入框聚焦时，整个卡片高亮 */
+  &:focus-within {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+
+    .icon-area {
+      background: #eff6ff;
+      color: $primary-color;
+    }
+  }
+
+  /* 左侧图标区域 */
+  .icon-area {
+    width: 60px; /* 固定宽度 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border-right: 1px solid #f1f5f9;
+    font-size: 22px; /* 图标统一大小 */
+    color: #64748b;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+  }
+
+  /* 右侧输入区域 */
+  .input-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 20px;
+    min-width: 0;
+
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 4px; /* Label 与 Input 的间距 */
+      display: block;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    /* 覆写 Element Plus Input 样式，使其"无边框化" */
+    .seamless-input {
+      width: 100%;
+
+      :deep(.el-input__wrapper) {
+        box-shadow: none !important;
+        background: transparent;
+        padding: 0;
+        height: 32px; /* 内部高度一致 */
+      }
+      :deep(.el-input__inner) {
+        font-size: 18px !important; /* ✅ 核心修改：字体大小一致 (特大) */
+        font-weight: 600 !important;
+        color: $text-main !important;
+        height: 32px !important;
+        line-height: 32px !important;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+
+        &::placeholder {
+          font-weight: 400;
+          color: #cbd5e1;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  /* 纵向布局模式 (用于卖点) - 高度自动 */
+  &.column-layout {
+    height: auto; /* 卖点卡片高度自适应 */
+    flex-direction: column;
+    padding: 16px;
+
+    .tags-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      font-size: 13px;
+      margin-bottom: 12px;
+
+      .el-icon { color: #f59e0b; }
+    }
+
+    .tags-canvas {
+      min-height: 80px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+
+      :deep(.el-tag) {
+        border-radius: 6px;
+        height: 32px;
+        padding: 0 12px;
+      }
+
+      .new-tag-input-ghost {
+        width: 120px;
+        :deep(.el-input__wrapper) {
+          box-shadow: none !important;
+          background: #f1f5f9;
+          border-radius: 6px;
+          padding: 0 10px;
+        }
+        :deep(.el-input__inner) {
+          font-size: 13px;
+        }
+      }
+    }
+
+    .quick-tags-bar {
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .label { font-size: 11px; color: #94a3b8; font-weight: 600; }
+      .pills {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        .pill {
+          font-size: 11px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          padding: 4px 10px;
+          border-radius: 20px;
+          cursor: pointer;
+          color: #475569;
+          transition: all 0.2s;
+
+          &:hover {
+            background: #eff6ff;
+            color: $primary-color;
+            border-color: #bfdbfe;
+          }
+        }
+      }
+    }
   }
 }
+
+.field-wrapper {
+  margin-bottom: 0;
+}
+
+/* --- ✅ 新增：条码预览区域样式 --- */
+.barcode-preview-area {
+  margin-top: 8px;
+  padding: 0 4px;
+  animation: slideDown 0.3s ease-out;
+
+  .barcode-card {
+    display: flex;
+    align-items: center;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    gap: 12px;
+
+    .icon-box {
+      width: 36px;
+      height: 36px;
+      background: #fff;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $primary-color;
+      font-size: 18px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .info {
+      flex: 1;
+      .label { display: block; font-size: 10px; color: $text-sec; font-weight: 600; text-transform: uppercase; }
+      .filename { display: block; font-size: 12px; color: $text-main; font-weight: 600; word-break: break-all;}
+    }
+
+    .view-btn {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+  }
+}
+@keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
 
 /* --- 9. 步骤四：准备生成 (Step 4) --- */
 .centered-panel { text-align: center; .panel-card { border: none; box-shadow: none; background: transparent; } }

@@ -1,7 +1,12 @@
 import { reactive, ref } from 'vue'
 import { ElMessage, ElLoading, type FormInstance, type FormRules, type UploadFile } from 'element-plus'
 
+// --- 全局配置 ---
+const OSS_BASE_URL = 'https://oss-pro.plm.westmonth.cn'
+
 // --- 接口定义 ---
+
+// 1. 基础数据结构
 export interface Dimensions { length: number; width: number; height: number; bleedX: number; bleedY: number; bleedInner: number; }
 export interface Content {
     productName: string;
@@ -13,7 +18,16 @@ export interface Content {
     address: string;
     directions: string;
 }
-export interface Marketing { sku: string; brand: string; capacityValue: string; capacityUnit: string; sellingPoints: string[]; }
+
+// ✅ Marketing 接口 (包含新增的 capacityValueBack)
+export interface Marketing {
+    sku: string;
+    brand: string;
+    capacityValue: string;     // 正面规格
+    capacityValueBack: string; // 背面规格
+    capacityUnit: string;
+    sellingPoints: string[];
+}
 
 export interface WorkflowData {
     dimensions: Dimensions;
@@ -21,10 +35,11 @@ export interface WorkflowData {
     marketing: Marketing;
 }
 
-// 文档解析响应
+// 2. ✅ 修复：文档解析响应接口 (必须完整定义，不能省略)
 interface ParseDocResponse {
     code: number
     is_success: boolean
+    message: string
     data: {
         content: {
             product_name: string
@@ -43,7 +58,7 @@ interface ParseDocResponse {
     }
 }
 
-// 品牌信息
+// 3. 品牌相关接口
 export interface BrandItem {
     id: number
     code: string
@@ -65,7 +80,32 @@ interface BrandListResponse {
     }
 }
 
-// 任务状态
+interface BrandDetailResponse {
+    code: number
+    is_success: boolean
+    message: string
+    data: {
+        name: string
+        default_manufacturer?: {
+            manufacturer_english_name: string
+            manufacturer_english_address: string
+        }
+    }
+}
+
+// 4. 条码相关接口
+interface BarcodeResponse {
+    code: number
+    is_success: boolean
+    message: string
+    request_id: string
+    data: {
+        bar_code: string
+        bar_code_path: string
+    }
+}
+
+// 5. 任务与进度接口
 interface PsdTaskStatus {
     task_id: string
     progress: number
@@ -87,11 +127,12 @@ interface ProgressResponse {
     data: PsdTaskStatus
 }
 
+// --- 主要逻辑 Hook ---
 export function usePackagingConfig() {
     const activeStep = ref(0)
     const formRef = ref<FormInstance>()
     const isDocParsed = ref(false)
-    const fileName = ref('') // 这是上传文档的文件名
+    const fileName = ref('')
     const inputValue = ref('')
 
     // --- 状态管理 ---
@@ -99,17 +140,14 @@ export function usePackagingConfig() {
     const progressPercentage = ref(0)
     const progressStatus = ref('')
     const progressMessage = ref('准备提交任务...')
-
-    // 下载链接状态
     const currentDownloadUrl = ref('')
     const currentTaskId = ref('')
-
-    // ✅ 新增：用于存储后端生成的最终 PSD 文件名
     const generatedFileName = ref('')
-
     const brandOptions = ref<BrandItem[]>([])
+    const isFetchingBarcode = ref(false)
+    const barcodeUrl = ref('')
 
-
+    // 初始化数据
     const getInitialData = (): WorkflowData => ({
         dimensions: { length: 6, width: 6, height: 12, bleedX: 0.5, bleedY: 2, bleedInner: 0.15 },
         content: {
@@ -120,6 +158,7 @@ export function usePackagingConfig() {
             sku: 'SKU00001636',
             brand: 'WestMoon',
             capacityValue: 'NET：100G/3.53 FL.OZ',
+            capacityValueBack: 'NET：100G/3.53 FL.OZ', // 新增默认值
             capacityUnit: '',
             sellingPoints: [
                 'Professional-grade anti-fog solution.',
@@ -132,6 +171,7 @@ export function usePackagingConfig() {
 
     const formData = reactive<WorkflowData>(getInitialData())
 
+    // 验证规则
     const rules = reactive<FormRules>({
         'dimensions.length': [{ required: true, message: 'Required', trigger: 'blur' }],
         'dimensions.width': [{ required: true, message: 'Required', trigger: 'blur' }],
@@ -139,35 +179,38 @@ export function usePackagingConfig() {
         'content.productName': [{ required: true, message: '请上传文档', trigger: 'change' }],
         'marketing.sku': [{ required: true, message: '请输入 SKU', trigger: 'blur' }],
         'marketing.brand': [{ required: true, message: '请选择品牌', trigger: 'change' }],
-        'marketing.capacityValue': [{ required: true, message: '请输入规格', trigger: 'blur' }]
+        'marketing.capacityValue': [{ required: true, message: '请输入正面规格', trigger: 'blur' }],
+        'marketing.capacityValueBack': [{ required: true, message: '请输入背面规格', trigger: 'blur' }]
     })
+
+    // 步骤验证配置
+    const stepValidationConfig: Record<number, string[]> = {
+        0: ['dimensions.length', 'dimensions.width', 'dimensions.height'],
+        1: ['marketing.sku', 'marketing.brand', 'marketing.capacityValue', 'marketing.capacityValueBack'],
+        2: ['content.productName']
+    }
 
     // --- 流程控制 ---
     const nextStep = async () => {
         if (!formRef.value) return;
-        let fields: string[] = []
-
-        if (activeStep.value === 0) fields = ['dimensions.length', 'dimensions.width', 'dimensions.height']
-        else if (activeStep.value === 1) {
-            if (!isDocParsed.value) { ElMessage.warning('请上传文档'); return; }
-            fields = ['content.productName']
-        }
-        else if (activeStep.value === 2) fields = ['marketing.sku', 'marketing.brand', 'marketing.capacityValue']
-
-        await formRef.value.validateField(fields, (isValid) => { if (isValid) activeStep.value++ })
+        if (activeStep.value === 2 && !isDocParsed.value) { ElMessage.warning('请上传文档'); return; }
+        const fieldsToValidate = stepValidationConfig[activeStep.value] || []
+        if (fieldsToValidate.length > 0) {
+            await formRef.value.validateField(fieldsToValidate, (isValid) => { if (isValid) activeStep.value++ })
+        } else { activeStep.value++ }
     }
 
     const prevStep = () => { if (activeStep.value > 0) activeStep.value-- }
 
-    // 重置工作流
     const resetWorkflow = () => {
         Object.assign(formData, getInitialData())
         isDocParsed.value = false
         fileName.value = ''
-        generatedFileName.value = '' // 重置文件名
+        generatedFileName.value = ''
         activeStep.value = 0
         currentDownloadUrl.value = ''
         currentTaskId.value = ''
+        barcodeUrl.value = ''
     }
 
     // --- 文件处理 ---
@@ -195,7 +238,9 @@ export function usePackagingConfig() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ file_name: file.name, file_content_base64: base64String })
             })
+            // ✅ 这里现在可以正确识别 ParseDocResponse 的属性了
             const resData = (await response.json()) as ParseDocResponse
+
             if (response.ok && resData.code === 200 && resData.is_success && resData.data) {
                 const parsed = resData.data.content
                 Object.assign(formData.content, {
@@ -231,7 +276,75 @@ export function usePackagingConfig() {
         if (!formData.marketing.sellingPoints.includes(tag)) formData.marketing.sellingPoints.push(tag)
     }
 
-    // --- PSD 生成逻辑 ---
+    // --- 品牌切换处理 ---
+    const handleBrandChange = async (brandName: string) => {
+        if (!brandName) return
+        const brand = brandOptions.value.find(b => b.name === brandName)
+        if (!brand || !brand.code) return
+
+        const loading = ElLoading.service({ text: '正在获取品牌制造商信息...', background: 'rgba(255,255,255,0.6)' })
+        try {
+            const token = localStorage.getItem('token')
+            const response = await fetch('/api/plm/brand/detail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify({ code: brand.code })
+            })
+            const resData = await response.json() as BrandDetailResponse
+
+            if (resData.is_success && resData.data?.default_manufacturer) {
+                formData.content.manufacturer = resData.data.default_manufacturer.manufacturer_english_name || ''
+                formData.content.address = resData.data.default_manufacturer.manufacturer_english_address || ''
+                ElMessage.success('已更新制造商信息')
+            }
+        } catch (error) {
+            console.error('Fetch brand detail failed', error)
+            ElMessage.warning('获取制造商信息失败，请手动输入')
+        } finally {
+            loading.close()
+        }
+    }
+
+    // --- 条码获取 ---
+    const handleFetchBarcode = async () => {
+        const skuCode = formData.marketing.sku
+        if (!skuCode) return
+
+        barcodeUrl.value = ''
+        isFetchingBarcode.value = true
+
+        try {
+            const token = localStorage.getItem('token')
+            const response = await fetch('/api/plm/product/barcode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify({ code: skuCode })
+            })
+
+            const resData = (await response.json()) as BarcodeResponse
+
+            if (response.ok && resData.is_success && resData.data?.bar_code_path) {
+                const path = resData.data.bar_code_path
+                const fullUrl = path.startsWith('http') ? path : `${OSS_BASE_URL}${path}`
+                barcodeUrl.value = fullUrl
+            } else {
+                console.warn('Barcode not found or API error', resData.message)
+            }
+
+        } catch (error) {
+            console.error('Failed to fetch barcode', error)
+        } finally {
+            isFetchingBarcode.value = false
+        }
+    }
+
+    // --- PSD 生成 ---
     const handleGeneratePSD = async () => {
         isGenerating.value = true
         progressPercentage.value = 0
@@ -241,6 +354,7 @@ export function usePackagingConfig() {
         try {
             const token = localStorage.getItem('token')
             const username = localStorage.getItem('username') || 'User'
+
             const payload = {
                 project_name: `${formData.marketing.brand}_${formData.marketing.sku}`.replace(/\s+/g, '_'),
                 user_context: { username: username, generate_dieline: true },
@@ -250,7 +364,13 @@ export function usePackagingConfig() {
                 },
                 assets: {
                     texts: {
-                        main_panel: { brand_name: formData.marketing.brand, product_name: formData.content.productName, capacity_info: formData.marketing.capacityValue, selling_points: formData.marketing.sellingPoints },
+                        main_panel: {
+                            brand_name: formData.marketing.brand,
+                            product_name: formData.content.productName,
+                            capacity_info: formData.marketing.capacityValue,
+                            capacity_info_back: formData.marketing.capacityValueBack, // 传递新字段
+                            selling_points: formData.marketing.sellingPoints
+                        },
                         info_panel: { ingredients: formData.content.ingredients, manufacturer: formData.content.manufacturer, origin: formData.content.origin, warnings: formData.content.warnings, directions: formData.content.directions, address: formData.content.address }
                     },
                     dynamic_images: { barcode: { value: formData.marketing.sku, type: 'EAN-13' } }
@@ -300,26 +420,17 @@ export function usePackagingConfig() {
                         progressStatus.value = 'success'
                         progressMessage.value = '生成完成，即将下载...'
 
-                        // 获取下载链接
                         const downloadUrl = task.download_url
                             ? task.download_url
                             : `/api/design/download/${taskId}?fileName=${defaultName}.psd`
 
                         currentDownloadUrl.value = downloadUrl
 
-                        // ✅ 核心修复：解析下载链接中的 fileName 参数，获取后端生成的带时间戳的名称
                         try {
-                            // 使用 window.location.origin 作为基准，防止相对路径报错
                             const urlObj = new URL(downloadUrl, window.location.origin)
                             const finalFileName = urlObj.searchParams.get('fileName')
-
-                            if (finalFileName) {
-                                generatedFileName.value = decodeURIComponent(finalFileName)
-                            } else {
-                                generatedFileName.value = `${defaultName}.psd`
-                            }
+                            generatedFileName.value = finalFileName ? decodeURIComponent(finalFileName) : `${defaultName}.psd`
                         } catch (e) {
-                            console.warn('解析文件名失败，使用默认值', e)
                             generatedFileName.value = `${defaultName}.psd`
                         }
 
@@ -343,27 +454,14 @@ export function usePackagingConfig() {
         })
     }
 
-    const triggerDownload = async (url: string) => {
-        try {
-            const token = localStorage.getItem('token')
-            const res = await fetch(url, { headers: { 'Authorization': token ? `Bearer ${token}` : '' } })
-            if(!res.ok) throw new Error('Download Failed')
-            const blob = await res.blob()
-            const blobUrl = window.URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = blobUrl
-            // 解析 URL 中的 fileName 参数
-            const fileName = url.split('fileName=')[1] || 'design.psd'
-            link.download = decodeURIComponent(fileName)
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            window.URL.revokeObjectURL(blobUrl)
-            ElMessage.success('下载已开始')
-        } catch (e) {
-            console.error(e)
-            ElMessage.error('自动下载失败，请点击按钮手动下载')
-        }
+    const triggerDownload = (url: string) => {
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', '')
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        ElMessage.success('下载已开始，请留意浏览器下载任务')
     }
 
     const fetchBrandList = async () => {
@@ -379,7 +477,10 @@ export function usePackagingConfig() {
 
     return {
         activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
-        isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl, generatedFileName, // 导出这个新变量
-        nextStep, prevStep, resetWorkflow, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload
+        isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl, generatedFileName,
+        isFetchingBarcode, barcodeUrl,
+        nextStep, prevStep, resetWorkflow, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload,
+        handleBrandChange,
+        handleFetchBarcode
     }
 }

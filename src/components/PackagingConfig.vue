@@ -29,8 +29,8 @@
       <div class="steps-container">
         <el-steps :active="activeStep" finish-status="success" align-center class="custom-steps">
           <el-step title="定义规格" icon="Box" />
-          <el-step title="文案解析" icon="DocumentChecked" />
           <el-step title="产品定义" icon="PriceTag" />
+          <el-step title="文案解析" icon="DocumentChecked" />
           <el-step title="构建交付" icon="Files" />
         </el-steps>
       </div>
@@ -70,8 +70,174 @@
               </div>
             </div>
 
-            <div v-else-if="activeStep === 1" key="step2" class="step-panel">
-              <div class="panel-header"><h2>文案智能解析</h2><p>上传 Word 文档，AI 将自动提取关键合规信息。</p></div>
+            <div v-else-if="activeStep === 1" key="step2-product" class="step-panel marketing-panel">
+              <div class="panel-header">
+                <h2>产品定义</h2>
+                <p>确立产品的视觉基调与核心卖点。</p>
+              </div>
+
+              <div class="product-definition-container">
+
+                <div class="section-title-sm">产品身份 Identity</div>
+
+                <div class="field-stack">
+
+                  <el-form-item prop="marketing.brand" class="field-wrapper">
+                    <div class="field-card">
+                      <div class="icon-area"><el-icon><Trophy /></el-icon></div>
+                      <div class="input-area">
+                        <label>品牌名称 Brand Name</label>
+                        <el-select
+                            v-model="formData.marketing.brand"
+                            placeholder="选择或输入品牌"
+                            class="seamless-input"
+                            filterable
+                            clearable
+                            allow-create
+                            default-first-option
+                            @change="handleBrandChange"
+                        >
+                          <el-option
+                              v-for="item in brandOptions"
+                              :key="item.id"
+                              :label="`${item.name} - ${item.brand_category_name || 'Unknown'}`"
+                              :value="item.name"
+                          />
+                        </el-select>
+                      </div>
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item class="field-wrapper">
+                    <div class="field-card">
+                      <div class="icon-area"><el-icon><OfficeBuilding /></el-icon></div>
+                      <div class="input-area">
+                        <label>制造商 Manufacturer</label>
+                        <el-input v-model="formData.content.manufacturer" placeholder="自动获取或手动输入" class="seamless-input" clearable />
+                      </div>
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item class="field-wrapper">
+                    <div class="field-card">
+                      <div class="icon-area"><el-icon><Location /></el-icon></div>
+                      <div class="input-area">
+                        <label>制造商地址 Manufacturer Address</label>
+                        <el-input v-model="formData.content.address" placeholder="自动获取或手动输入" class="seamless-input" clearable />
+                      </div>
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item prop="marketing.sku" class="field-wrapper">
+                    <div class="field-card">
+                      <div class="icon-area"><el-icon><Ticket /></el-icon></div>
+                      <div class="input-area">
+                        <label>商品编码 SKU</label>
+                        <el-input
+                            v-model="formData.marketing.sku"
+                            placeholder="例如：SKU-2024-X01"
+                            class="seamless-input"
+                            clearable
+                            @change="handleFetchBarcode"
+                        />
+                      </div>
+                    </div>
+
+                    <div v-if="isFetchingBarcode || barcodeUrl" class="barcode-preview-area">
+                      <div v-if="isFetchingBarcode" style="padding: 10px; text-align: center;">
+                        <el-icon class="is-loading"><Loading /></el-icon> <span style="font-size: 12px; color: #94a3b8; margin-left: 6px;">正在查找条码文件...</span>
+                      </div>
+                      <div v-else-if="barcodeUrl" class="barcode-card">
+                        <div class="icon-box"><el-icon><DocumentChecked /></el-icon></div>
+                        <div class="info">
+                          <span class="label">商品条码 BARCODE FIle</span>
+                          <span class="filename">{{ barcodeUrl.split('/').pop() }}</span>
+                        </div>
+                        <el-button
+                            type="primary"
+                            link
+                            class="view-btn"
+                            :icon="Link"
+                            tag="a"
+                            :href="barcodeUrl"
+                            target="_blank"
+                        >
+                          预览
+                        </el-button>
+                      </div>
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item prop="marketing.capacityValue" class="field-wrapper">
+                    <div class="field-card">
+                      <div class="icon-area"><el-icon><DataLine /></el-icon></div>
+                      <div class="input-area">
+                        <label>含量（正面）Spec (Front)</label>
+                        <el-input v-model="formData.marketing.capacityValue" placeholder="例如：500ml / 100g" class="seamless-input" clearable />
+                      </div>
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item prop="marketing.capacityValueBack" class="field-wrapper">
+                    <div class="field-card">
+                      <div class="icon-area"><el-icon><DataLine /></el-icon></div>
+                      <div class="input-area">
+                        <label>含量（背面） Spec (Back)</label>
+                        <el-input v-model="formData.marketing.capacityValueBack" placeholder="例如：500ml / 100g" class="seamless-input" clearable />
+                      </div>
+                    </div>
+                  </el-form-item>
+
+                </div>
+
+                <div class="section-title-sm" style="margin-top: 30px;">正面卖点文案 Selling Points</div>
+
+                <el-form-item prop="marketing.sellingPoints" class="field-wrapper">
+                  <div class="field-card column-layout">
+                    <div class="tags-header">
+                      <el-icon><Star /></el-icon>
+                      <span>输入能够打动消费者的产品特性 (回车添加)</span>
+                    </div>
+
+                    <div class="tags-canvas">
+                      <el-tag
+                          v-for="tag in formData.marketing.sellingPoints"
+                          :key="tag"
+                          closable
+                          type="primary"
+                          size="large"
+                          @close="handleCloseTag(tag)"
+                      >
+                        {{ tag }}
+                      </el-tag>
+
+                      <el-input
+                          v-if="formData.marketing.sellingPoints.length < 5"
+                          v-model="inputValue"
+                          class="new-tag-input-ghost"
+                          placeholder="+ Add Point"
+                          @keyup.enter="handleInputConfirm"
+                          @blur="handleInputConfirm"
+                      />
+                    </div>
+
+                    <div class="quick-tags-bar">
+                      <span class="label">快速推荐:</span>
+                      <div class="pills">
+                        <span class="pill" @click="addQuickTag('Eco-Friendly')">🌿 Eco-Friendly</span>
+                        <span class="pill" @click="addQuickTag('Organic')">🥬 Organic</span>
+                        <span class="pill" @click="addQuickTag('Premium Quality')">💎 Premium</span>
+                        <span class="pill" @click="addQuickTag('Long Lasting')">⏳ Long Lasting</span>
+                      </div>
+                    </div>
+                  </div>
+                </el-form-item>
+
+              </div>
+            </div>
+
+            <div v-else-if="activeStep === 2" key="step3-doc" class="step-panel">
+              <div class="panel-header"><h2>文案智能解析</h2><p>上传 Word 文档，智能提取文档关键信息。</p></div>
               <div class="panel-card">
                 <div v-if="!isDocParsed" class="upload-zone">
                   <el-upload class="hero-upload" drag action="#" :auto-upload="false" :on-change="handleFileUpload" :show-file-list="false">
@@ -90,50 +256,6 @@
                     <div class="data-group full"><label>使用方法 (Directions)</label><div class="data-value text-block">{{ formData.content.directions || '-' }}</div></div>
                     <div class="data-group full"><label>警示语 (Warnings)</label><div class="data-value text-block">{{ formData.content.warnings || '-' }}</div></div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <div v-else-if="activeStep === 2" key="step3" class="step-panel marketing-panel">
-              <div class="panel-header"><h2>产品定义</h2><p>确立产品的视觉基调与核心卖点。</p></div>
-              <div class="panel-card">
-
-                <div class="form-section-block">
-                  <el-form-item prop="marketing.brand" class="brand-item">
-                    <div class="label-with-icon"><el-icon><Trophy /></el-icon> 品牌名称 (Brand Name)</div>
-                    <el-select v-model="formData.marketing.brand" placeholder="请选择品牌" class="brand-input-lg" filterable clearable>
-                      <el-option v-for="item in brandOptions" :key="item.id" :label="item.name" :value="item.name" />
-                    </el-select>
-                  </el-form-item>
-                </div>
-                <div class="form-section-block">
-                  <el-form-item prop="marketing.sku" class="brand-item">
-                    <div class="label-with-icon"><el-icon><Ticket /></el-icon> 商品编码 (SKU)</div>
-                    <el-input v-model="formData.marketing.sku" placeholder="例如：SKU-2024-X01" class="brand-input-lg" clearable />
-                  </el-form-item>
-                </div>
-                <div class="form-section-block">
-                  <el-form-item prop="marketing.capacityValue" class="brand-item">
-                    <div class="label-with-icon"><el-icon><DataLine /></el-icon> 规格详情 (Spec)</div>
-                    <el-input v-model="formData.marketing.capacityValue" placeholder="例如：500ml" class="brand-input-lg" clearable />
-                  </el-form-item>
-                </div>
-                <div class="form-section-block">
-                  <div class="section-label">核心卖点 (Selling Points)</div>
-                  <el-form-item prop="marketing.sellingPoints">
-                    <div class="tags-wrapper enhanced full-width-tags">
-                      <div class="tags-list">
-                        <el-tag v-for="tag in formData.marketing.sellingPoints" :key="tag" closable type="primary" effect="light" @close="handleCloseTag(tag)">{{ tag }}</el-tag>
-                        <el-input v-if="formData.marketing.sellingPoints.length < 5" v-model="inputValue" class="new-tag-input" placeholder="+ 输入按回车" @keyup.enter="handleInputConfirm" @blur="handleInputConfirm" />
-                      </div>
-                      <div class="quick-tags">
-                        <span>推荐:</span>
-                        <span class="q-tag" @click="addQuickTag('Eco-Friendly')">Eco-Friendly</span>
-                        <span class="q-tag" @click="addQuickTag('Organic')">Organic</span>
-                        <span class="q-tag" @click="addQuickTag('Premium')">Premium</span>
-                      </div>
-                    </div>
-                  </el-form-item>
                 </div>
               </div>
             </div>
@@ -202,61 +324,29 @@
       </footer>
     </div>
 
-    <el-dialog
-        v-model="isGenerating"
-        :show-close="false"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        width="380px"
-        align-center
-        class="design-gen-dialog"
-    >
-      <template #header>
-        <div class="dialog-header-custom">
-          <div class="icon-pulse">
-            <el-icon><MagicStick /></el-icon> </div>
-          <span class="header-title">正在生成设计文件</span>
-        </div>
-      </template>
-
+    <el-dialog v-model="isGenerating" :show-close="false" width="380px" align-center class="design-gen-dialog">
+      <template #header><div class="dialog-header-custom"><div class="icon-pulse"><el-icon><MagicStick /></el-icon></div><span class="header-title">正在生成设计文件</span></div></template>
       <div class="progress-dialog-content">
-        <div class="progress-ring-wrapper">
-          <el-progress
-              type="circle"
-              :percentage="progressPercentage"
-              :status="progressStatus as any"
-              :width="150"
-              :stroke-width="10"
-              color="#2563eb"
-              :show-text="false"
-              stroke-linecap="round"
-          />
-          <div class="ring-inner-text">
-            <span class="number">{{ progressPercentage }}</span>
-            <span class="symbol">%</span>
-          </div>
-        </div>
-        <div class="status-box">
-          <p class="status-main">{{ progressStatus === 'success' ? '生成成功' : '处理中...' }}</p>
-          <p class="status-sub">{{ progressMessage }}</p>
-        </div>
+        <div class="progress-ring-wrapper"><el-progress type="circle" :percentage="progressPercentage" :status="progressStatus as any" :width="150" :stroke-width="10" color="#2563eb" :show-text="false" stroke-linecap="round" /><div class="ring-inner-text"><span class="number">{{ progressPercentage }}</span><span class="symbol">%</span></div></div>
+        <div class="status-box"><p class="status-main">{{ progressStatus === 'success' ? '生成成功' : '处理中...' }}</p><p class="status-sub">{{ progressMessage }}</p></div>
       </div>
     </el-dialog>
-
   </div>
 </template>
 
 <script lang="ts" setup>
-import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, DataLine, Select, Files, MagicStick, Download } from '@element-plus/icons-vue'
+import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, DataLine, Select, Files, MagicStick, Download, Star, OfficeBuilding, Location, Link, Loading } from '@element-plus/icons-vue'
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 
 defineProps<{ username: string }>()
 defineEmits(['logout'])
 
+// ✅ 解构保持不变，逻辑层已经处理了新的数据字段
 const {
   activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
   isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl, generatedFileName,
-  nextStep, prevStep, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload, resetWorkflow
+  isFetchingBarcode, barcodeUrl,
+  nextStep, prevStep, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload, resetWorkflow, handleBrandChange, handleFetchBarcode
 } = usePackagingConfig()
 </script>
 
