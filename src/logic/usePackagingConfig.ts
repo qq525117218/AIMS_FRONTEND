@@ -160,7 +160,7 @@ export function usePackagingConfig() {
             origin: '', shelfLife: '', address: '', directions: ''
         },
         marketing: {
-            sku: 'SKU00001636',
+            sku: 'SKU00001885',
             brand: 'WestMoon',
             capacityValue: 'NET：100G/3.53 FL.OZ',
             capacityValueBack: 'NET：100G/3.53 FL.OZ',

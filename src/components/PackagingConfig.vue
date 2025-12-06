@@ -310,7 +310,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, DataLine, Select, Files, MagicStick, Download, Star, OfficeBuilding, Location, Link, Loading, Medal, DataBoard, Monitor, Document, StarFilled, Picture } from '@element-plus/icons-vue'
+import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, Select, Files, MagicStick, Download, OfficeBuilding, Location, Link, Monitor, Document, StarFilled, Picture } from '@element-plus/icons-vue'
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 
 defineProps<{ username: string }>()
