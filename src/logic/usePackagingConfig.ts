@@ -8,18 +8,20 @@ const OSS_BASE_URL = 'https://oss-pro.plm.westmonth.cn'
 
 // 1. 基础数据结构
 export interface Dimensions { length: number; width: number; height: number; bleedX: number; bleedY: number; bleedInner: number; }
+
+// Content 接口：对应 Step 3 文档解析的数据 (通常是实际生产工厂信息)
 export interface Content {
     productName: string;
     ingredients: string;
     warnings: string;
-    manufacturer: string;
+    manufacturer: string; // 实际生产商 (Factory)
     origin: string;
     shelfLife: string;
-    address: string;
+    address: string;      // 实际生产地址 (Factory Address)
     directions: string;
 }
 
-// Marketing 接口
+// Marketing 接口：对应 Step 2 产品定义的数据 (通常是品牌方/经销商信息)
 export interface Marketing {
     sku: string;
     brand: string;
@@ -27,6 +29,9 @@ export interface Marketing {
     capacityValueBack: string; // 背面规格
     capacityUnit: string;
     sellingPoints: string[];
+    // [New] 新增独立字段，与 Content 解耦
+    manufacturer: string; // 品牌商/经销商 (Distributor/Brand Owner)
+    address: string;      // 品牌商地址 (Distributor Address)
 }
 
 export interface WorkflowData {
@@ -165,7 +170,10 @@ export function usePackagingConfig() {
                 'Effective long-lasting anti-fog.',
                 'Versatile for multiple surfaces.',
                 'Safe reef-friendly ingredients.'
-            ]
+            ],
+            // [New] 初始化新增字段
+            manufacturer: '',
+            address: ''
         }
     })
 
@@ -242,6 +250,7 @@ export function usePackagingConfig() {
 
             if (response.ok && resData.code === 200 && resData.is_success && resData.data) {
                 const parsed = resData.data.content
+                // 解析逻辑保持更新 content 字段 (代表工厂侧数据)
                 Object.assign(formData.content, {
                     productName: parsed.product_name || '',
                     manufacturer: parsed.manufacturer || '',
@@ -295,13 +304,14 @@ export function usePackagingConfig() {
             const resData = await response.json() as BrandDetailResponse
 
             if (resData.is_success && resData.data?.default_manufacturer) {
-                formData.content.manufacturer = resData.data.default_manufacturer.manufacturer_english_name || ''
-                formData.content.address = resData.data.default_manufacturer.manufacturer_english_address || ''
-                ElMessage.success('已更新制造商信息')
+                // [Core Change] 品牌选择更新 marketing 字段 (代表品牌/经销商信息)
+                formData.marketing.manufacturer = resData.data.default_manufacturer.manufacturer_english_name || ''
+                formData.marketing.address = resData.data.default_manufacturer.manufacturer_english_address || ''
+                ElMessage.success('已更新品牌方信息')
             }
         } catch (error) {
             console.error('Fetch brand detail failed', error)
-            ElMessage.warning('获取制造商信息失败，请手动输入')
+            ElMessage.warning('获取品牌信息失败，请手动输入')
         } finally {
             loading.close()
         }
@@ -370,24 +380,25 @@ export function usePackagingConfig() {
                             capacity_info: formData.marketing.capacityValue,
                             capacity_info_back: formData.marketing.capacityValueBack,
                             selling_points: formData.marketing.sellingPoints,
-                            // ✅ 绑定修复：显式绑定【产品定义】页面的数据源 (formData.content)
-                            manufacturer: formData.content.manufacturer,
-                            address: formData.content.address
+                            // [Core Change] main_panel 使用 marketing 数据 (品牌方/经销商)
+                            manufacturer: formData.marketing.manufacturer,
+                            address: formData.marketing.address
                         },
                         info_panel: {
                             ingredients: formData.content.ingredients,
-                            manufacturer: formData.content.manufacturer, // 保持 info_panel 也使用相同数据
+                            // [Core Change] info_panel 使用 content 数据 (解析出的实际工厂/文档数据)
+                            manufacturer: formData.content.manufacturer,
                             origin: formData.content.origin,
                             warnings: formData.content.warnings,
                             directions: formData.content.directions,
-                            address: formData.content.address // 保持 info_panel 也使用相同数据
+                            // [Core Change] 同上
+                            address: formData.content.address
                         }
                     },
                     dynamic_images: {
                         barcode: {
                             value: formData.marketing.sku,
                             type: 'EAN-13',
-                            // ✅ 保持：传递条码 URL
                             url: barcodeUrl.value
                         }
                     }

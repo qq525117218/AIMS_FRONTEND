@@ -109,8 +109,8 @@
                     <div class="standard-input-card">
                       <div class="icon-wrapper"><el-icon><OfficeBuilding /></el-icon></div>
                       <div class="content-wrapper">
-                        <label>制造商 Manufacturer</label>
-                        <el-input v-model="formData.content.manufacturer" placeholder="自动关联或手动输入" class="seamless-input" />
+                        <label>制造商 Manufacturer (品牌/委托方)</label>
+                        <el-input v-model="formData.marketing.manufacturer" placeholder="自动关联或手动输入" class="seamless-input" />
                       </div>
                     </div>
                   </el-form-item>
@@ -119,8 +119,8 @@
                     <div class="standard-input-card">
                       <div class="icon-wrapper"><el-icon><Location /></el-icon></div>
                       <div class="content-wrapper">
-                        <label>产地地址 Address</label>
-                        <el-input v-model="formData.content.address" placeholder="自动关联或手动输入" class="seamless-input" />
+                        <label>产地地址 Address (品牌地址)</label>
+                        <el-input v-model="formData.marketing.address" placeholder="自动关联或手动输入" class="seamless-input" />
                       </div>
                     </div>
                   </el-form-item>
