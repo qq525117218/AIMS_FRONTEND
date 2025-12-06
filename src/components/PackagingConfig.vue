@@ -156,10 +156,11 @@
                         <label>商品编码 SKU</label>
                         <el-input
                             v-model="formData.marketing.sku"
-                            placeholder="例如：SKU-2024-X01"
+                            placeholder="例如：SKU00001885 ,输入编码后请按回车"
                             class="seamless-input"
                             @change="handleFetchBarcode"
                         />
+
                       </div>
                       <div class="status-indicator">
                         <el-tag v-if="barcodeUrl" type="success" effect="dark" round size="small">已关联条码</el-tag>
