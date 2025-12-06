@@ -90,6 +90,7 @@
                           filterable
                           allow-create
                           default-first-option
+                          :fit-input-width="true"
                           @change="handleBrandChange"
                       >
                         <el-option
@@ -103,25 +104,49 @@
                   </div>
                 </el-form-item>
 
-                <el-form-item class="stack-item">
-                  <div class="standard-input-card">
-                    <div class="icon-wrapper"><el-icon><OfficeBuilding /></el-icon></div>
-                    <div class="content-wrapper">
-                      <label>制造商 Manufacturer</label>
-                      <el-input v-model="formData.content.manufacturer" placeholder="自动关联或手动输入" class="seamless-input" />
+                <div class="grid-two-col">
+                  <el-form-item class="stack-item">
+                    <div class="standard-input-card">
+                      <div class="icon-wrapper"><el-icon><OfficeBuilding /></el-icon></div>
+                      <div class="content-wrapper">
+                        <label>制造商 Manufacturer</label>
+                        <el-input v-model="formData.content.manufacturer" placeholder="自动关联或手动输入" class="seamless-input" />
+                      </div>
                     </div>
-                  </div>
-                </el-form-item>
+                  </el-form-item>
 
-                <el-form-item class="stack-item">
-                  <div class="standard-input-card">
-                    <div class="icon-wrapper"><el-icon><Location /></el-icon></div>
-                    <div class="content-wrapper">
-                      <label>产地地址 Address</label>
-                      <el-input v-model="formData.content.address" placeholder="自动关联或手动输入" class="seamless-input" />
+                  <el-form-item class="stack-item">
+                    <div class="standard-input-card">
+                      <div class="icon-wrapper"><el-icon><Location /></el-icon></div>
+                      <div class="content-wrapper">
+                        <label>产地地址 Address</label>
+                        <el-input v-model="formData.content.address" placeholder="自动关联或手动输入" class="seamless-input" />
+                      </div>
                     </div>
-                  </div>
-                </el-form-item>
+                  </el-form-item>
+                </div>
+
+                <div class="grid-two-col">
+                  <el-form-item prop="marketing.capacityValue" class="stack-item">
+                    <div class="standard-input-card">
+                      <div class="icon-wrapper"><el-icon><Monitor /></el-icon></div>
+                      <div class="content-wrapper">
+                        <label>正面含量 Net Wt (Front)</label>
+                        <el-input v-model="formData.marketing.capacityValue" placeholder="e.g. 100g / 3.5oz" class="seamless-input" />
+                      </div>
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item prop="marketing.capacityValueBack" class="stack-item">
+                    <div class="standard-input-card">
+                      <div class="icon-wrapper"><el-icon><Document /></el-icon></div>
+                      <div class="content-wrapper">
+                        <label>背面含量 Net Wt (Back)</label>
+                        <el-input v-model="formData.marketing.capacityValueBack" placeholder="同上或不同" class="seamless-input" />
+                      </div>
+                    </div>
+                  </el-form-item>
+                </div>
 
                 <el-form-item prop="marketing.sku" class="stack-item">
                   <div class="standard-input-card has-drawer">
@@ -149,30 +174,10 @@
                   </div>
                 </el-form-item>
 
-                <el-form-item prop="marketing.capacityValue" class="stack-item">
-                  <div class="standard-input-card">
-                    <div class="icon-wrapper"><el-icon><Monitor /></el-icon></div>
-                    <div class="content-wrapper">
-                      <label>正面含量 Net Wt (Front)</label>
-                      <el-input v-model="formData.marketing.capacityValue" placeholder="例如：100g / 3.5oz" class="seamless-input" />
-                    </div>
-                  </div>
-                </el-form-item>
-
-                <el-form-item prop="marketing.capacityValueBack" class="stack-item">
-                  <div class="standard-input-card">
-                    <div class="icon-wrapper"><el-icon><Document /></el-icon></div>
-                    <div class="content-wrapper">
-                      <label>背面含量 Net Wt (Back)</label>
-                      <el-input v-model="formData.marketing.capacityValueBack" placeholder="同上或不同" class="seamless-input" />
-                    </div>
-                  </div>
-                </el-form-item>
-
                 <el-form-item prop="marketing.sellingPoints" class="stack-item" style="margin-top: 10px;">
                   <div class="selling-points-board">
                     <div class="board-header">
-                      <el-icon><StarFilled /></el-icon> <span>核心卖点 Selling Points</span>
+                      <el-icon><StarFilled /></el-icon> <span>正面卖点文案 Selling Points</span>
                     </div>
                     <div class="tags-area">
                       <el-tag

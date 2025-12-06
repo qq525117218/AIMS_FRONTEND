@@ -80,7 +80,8 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 /* --- 4. 主体区域 (Body) --- */
 .workflow-body {
   flex: 1;
-  max-width: 720px; /* 进一步收窄宽度，增加聚焦感 */
+  /* 优化点1：增加最大宽度，从 720px -> 960px，让并排布局更舒适 */
+  max-width: 960px;
   margin: 0 auto;
   width: 100%;
   padding: 40px 20px 100px 20px;
@@ -159,12 +160,12 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
 .custom-divider { margin: 32px 0; border-top: 1px dashed $border-color; }
 
-/* --- 7. 步骤二：产品定义 (Step 2 - Vertical Standard Stack) --- */
+/* --- 7. 步骤二：产品定义 (Step 2 - Optimized Layout) --- */
 
 .vertical-stack-container {
   display: flex;
   flex-direction: column;
-  gap: 16px; /* 卡片间距 */
+  gap: 16px;
   margin: 0 auto;
 
   .stack-item {
@@ -173,27 +174,42 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
 }
 
+/* 优化点2：Grid 两列布局 */
+.grid-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+
+  /* 移动端自动退回单列 */
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* 统一的标准输入卡片 */
 .standard-input-card {
   background: #fff;
   border: 1px solid $border-color;
   border-radius: $radius-md;
-  height: 80px; /* ✅ 强制统一高度 */
+  overflow: hidden;
+  height: 80px;
   display: flex;
   align-items: center;
   padding: 0 20px;
   gap: 20px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  width: 100%; /* 确保在 Grid 中占满 */
+  box-sizing: border-box; /* 防止 padding 撑大 */
 
-  /* Hover 效果 */
   &:hover {
     border-color: #cbd5e1;
     box-shadow: $shadow-sm;
     transform: translateY(-1px);
+    z-index: 5; /* 避免阴影被遮挡 */
   }
 
-  /* Focus 效果 */
   &:focus-within {
     border-color: $primary-color;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -222,7 +238,7 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
   .content-wrapper {
     flex: 1;
-    min-width: 0;
+    min-width: 0; /* 关键：防止 flex 子项溢出 */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -238,16 +254,18 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       line-height: 1;
     }
 
-    /* 无缝输入框 */
+    /* 优化点3：无缝输入框 & 下拉框修复 */
     .seamless-input {
       width: 100%;
 
+      /* 针对 el-input 和 el-select 的通用样式重置 */
       :deep(.el-input__wrapper),
       :deep(.el-select__wrapper) {
         box-shadow: none !important;
-        padding: 0;
+        padding: 0 !important;
         background: transparent;
-        min-height: 28px;
+        min-height: 30px;
+        line-height: 30px;
       }
 
       :deep(.el-input__inner) {
@@ -264,21 +282,42 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
           color: #cbd5e1;
         }
       }
+
+      /* 针对 el-select 的特殊修复 */
+      &.el-select {
+        :deep(.el-select__selected-item) {
+          padding: 0 !important;
+          color: $text-main;
+          font-weight: 600;
+          font-size: 17px;
+          line-height: 30px;
+        }
+        :deep(.el-select__placeholder) {
+          padding: 0 !important;
+          font-weight: 400;
+          color: #cbd5e1;
+          font-size: 17px;
+        }
+        /* 隐藏掉不需要的边框，但保留箭头指示 */
+        :deep(.el-select__suffix) {
+          opacity: 0.5;
+        }
+      }
     }
   }
 }
 
 /* 特殊：带抽屉的卡片 (SKU) */
 .standard-input-card.has-drawer {
-  height: auto; /* 允许高度扩展 */
-  min-height: 80px; /* 最小高度保持一致 */
+  height: auto;
+  min-height: 80px;
   flex-direction: column;
   padding: 0;
   align-items: stretch;
   gap: 0;
 
   .main-row {
-    height: 80px; /* ✅ 关键：主区域高度与其他卡片完全一致 */
+    height: 80px;
     display: flex;
     align-items: center;
     padding: 0 20px;

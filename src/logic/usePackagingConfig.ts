@@ -19,7 +19,7 @@ export interface Content {
     directions: string;
 }
 
-// ✅ Marketing 接口 (包含新增的 capacityValueBack)
+// Marketing 接口
 export interface Marketing {
     sku: string;
     brand: string;
@@ -35,7 +35,7 @@ export interface WorkflowData {
     marketing: Marketing;
 }
 
-// 2. ✅ 修复：文档解析响应接口 (必须完整定义，不能省略)
+// 2. 文档解析响应接口
 interface ParseDocResponse {
     code: number
     is_success: boolean
@@ -158,7 +158,7 @@ export function usePackagingConfig() {
             sku: 'SKU00001636',
             brand: 'WestMoon',
             capacityValue: 'NET：100G/3.53 FL.OZ',
-            capacityValueBack: 'NET：100G/3.53 FL.OZ', // 新增默认值
+            capacityValueBack: 'NET：100G/3.53 FL.OZ',
             capacityUnit: '',
             sellingPoints: [
                 'Professional-grade anti-fog solution.',
@@ -238,7 +238,6 @@ export function usePackagingConfig() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ file_name: file.name, file_content_base64: base64String })
             })
-            // ✅ 这里现在可以正确识别 ParseDocResponse 的属性了
             const resData = (await response.json()) as ParseDocResponse
 
             if (response.ok && resData.code === 200 && resData.is_success && resData.data) {
@@ -355,6 +354,7 @@ export function usePackagingConfig() {
             const token = localStorage.getItem('token')
             const username = localStorage.getItem('username') || 'User'
 
+            // --- 构建 Payload ---
             const payload = {
                 project_name: `${formData.marketing.brand}_${formData.marketing.sku}`.replace(/\s+/g, '_'),
                 user_context: { username: username, generate_dieline: true },
@@ -368,12 +368,29 @@ export function usePackagingConfig() {
                             brand_name: formData.marketing.brand,
                             product_name: formData.content.productName,
                             capacity_info: formData.marketing.capacityValue,
-                            capacity_info_back: formData.marketing.capacityValueBack, // 传递新字段
-                            selling_points: formData.marketing.sellingPoints
+                            capacity_info_back: formData.marketing.capacityValueBack,
+                            selling_points: formData.marketing.sellingPoints,
+                            // ✅ 绑定修复：显式绑定【产品定义】页面的数据源 (formData.content)
+                            manufacturer: formData.content.manufacturer,
+                            address: formData.content.address
                         },
-                        info_panel: { ingredients: formData.content.ingredients, manufacturer: formData.content.manufacturer, origin: formData.content.origin, warnings: formData.content.warnings, directions: formData.content.directions, address: formData.content.address }
+                        info_panel: {
+                            ingredients: formData.content.ingredients,
+                            manufacturer: formData.content.manufacturer, // 保持 info_panel 也使用相同数据
+                            origin: formData.content.origin,
+                            warnings: formData.content.warnings,
+                            directions: formData.content.directions,
+                            address: formData.content.address // 保持 info_panel 也使用相同数据
+                        }
                     },
-                    dynamic_images: { barcode: { value: formData.marketing.sku, type: 'EAN-13' } }
+                    dynamic_images: {
+                        barcode: {
+                            value: formData.marketing.sku,
+                            type: 'EAN-13',
+                            // ✅ 保持：传递条码 URL
+                            url: barcodeUrl.value
+                        }
+                    }
                 }
             }
 
