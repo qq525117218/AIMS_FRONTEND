@@ -1,11 +1,16 @@
 /* --- 1. 全局变量 (Variables) --- */
 $primary-color: #2563eb;
+$primary-light: #eff6ff;
 $bg-color: #f8fafc;
 $card-bg: #ffffff;
 $text-main: #1e293b;
 $text-sec: #64748b;
 $border-color: #e2e8f0;
 $success-color: #10b981;
+$warning-color: #f59e0b;
+$radius-md: 12px;
+$radius-lg: 16px;
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
 /* --- 2. 基础布局 (Layout) --- */
 .workflow-page {
@@ -75,7 +80,7 @@ $success-color: #10b981;
 /* --- 4. 主体区域 (Body) --- */
 .workflow-body {
   flex: 1;
-  max-width: 800px;
+  max-width: 720px; /* 进一步收窄宽度，增加聚焦感 */
   margin: 0 auto;
   width: 100%;
   padding: 40px 20px 100px 20px;
@@ -87,40 +92,14 @@ $success-color: #10b981;
 .steps-container {
   margin-bottom: 20px;
 
-  :deep(.el-step__title) {
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  /* 已完成步骤的样式 (Success) */
-  :deep(.el-step__head.is-success) {
-    color: $primary-color;
-    border-color: $primary-color;
-  }
-  :deep(.el-step__title.is-success) {
-    color: $text-main;
-  }
-
-  /* 当前正在进行步骤的样式 (Active/Process) */
+  :deep(.el-step__title) { font-size: 13px; font-weight: 500; }
+  :deep(.el-step__head.is-success) { color: $primary-color; border-color: $primary-color; }
+  :deep(.el-step__title.is-success) { color: $text-main; }
   :deep(.el-step__head.is-process) {
-    color: $primary-color;
-    border-color: $primary-color;
-
-    .el-step__icon {
-      background-color: #eff6ff;
-      transform: scale(1.15);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-      transition: all 0.3s ease;
-      font-weight: bold;
-    }
+    color: $primary-color; border-color: $primary-color;
+    .el-step__icon { background-color: #eff6ff; transform: scale(1.15); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); transition: all 0.3s ease; font-weight: bold; }
   }
-
-  :deep(.el-step__title.is-process) {
-    color: $primary-color;
-    font-weight: 700;
-    transform: scale(1.05);
-    transition: all 0.3s ease;
-  }
+  :deep(.el-step__title.is-process) { color: $primary-color; font-weight: 700; transform: scale(1.05); transition: all 0.3s ease; }
 }
 
 .panel-header {
@@ -147,56 +126,6 @@ $success-color: #10b981;
   letter-spacing: 0.5px;
 }
 
-/* --- 5. 通用表单样式 (Form) --- */
-.form-section-block {
-  margin-bottom: 30px;
-  width: 100%;
-}
-
-.brand-item {
-  margin-bottom: 0;
-
-  .label-with-icon {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #475569;
-    margin-bottom: 8px;
-    .el-icon { color: #d97706; }
-  }
-
-  .brand-input-lg {
-    :deep(.el-input__wrapper) {
-      padding: 4px 15px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0 inset;
-      background: #fff;
-      border-radius: 8px;
-      transition: all 0.2s;
-
-      &.is-focus {
-        box-shadow: 0 0 0 2px $primary-color inset !important;
-      }
-    }
-
-    :deep(.el-input__inner) {
-      font-size: 18px !important;
-      font-weight: 700 !important;
-      color: $text-main !important;
-      height: 42px;
-      line-height: 42px;
-      font-family: 'Inter', sans-serif;
-
-      &::placeholder {
-        font-weight: 400;
-        color: #94a3b8;
-        font-size: 16px;
-      }
-    }
-  }
-}
-
 /* --- 6. 步骤一：规格定义 (Step 1) --- */
 .dimension-grid {
   display: flex;
@@ -206,11 +135,7 @@ $success-color: #10b981;
   padding: 24px;
   border-radius: 12px;
   margin-bottom: 24px;
-
-  &.bleed-theme {
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-  }
+  &.bleed-theme { background: #f8fafc; border: 1px dashed #cbd5e1; }
 }
 
 .dim-item {
@@ -219,14 +144,7 @@ $success-color: #10b981;
   align-items: center;
   flex: 1;
   position: relative;
-
-  .dim-bg-icon {
-    font-weight: 800;
-    color: #cbd5e1;
-    font-size: 24px;
-    margin-bottom: 8px;
-    font-family: monospace;
-  }
+  .dim-bg-icon { font-weight: 800; color: #cbd5e1; font-size: 24px; margin-bottom: 8px; font-family: monospace; }
   :deep(.el-input-number) { width: 100%; max-width: 120px; }
   :deep(.el-input__wrapper) { background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.03); border-radius: 8px; padding: 0 10px; }
   :deep(.el-input__inner) { text-align: center; font-weight: 600; font-size: 18px; }
@@ -241,7 +159,231 @@ $success-color: #10b981;
 
 .custom-divider { margin: 32px 0; border-top: 1px dashed $border-color; }
 
-/* --- 7. 步骤二：文案解析 (Step 2) --- */
+/* --- 7. 步骤二：产品定义 (Step 2 - Vertical Standard Stack) --- */
+
+.vertical-stack-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* 卡片间距 */
+  margin: 0 auto;
+
+  .stack-item {
+    margin-bottom: 0;
+    width: 100%;
+  }
+}
+
+/* 统一的标准输入卡片 */
+.standard-input-card {
+  background: #fff;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  height: 80px; /* ✅ 强制统一高度 */
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 20px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+
+  /* Hover 效果 */
+  &:hover {
+    border-color: #cbd5e1;
+    box-shadow: $shadow-sm;
+    transform: translateY(-1px);
+  }
+
+  /* Focus 效果 */
+  &:focus-within {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background: #fff;
+    z-index: 10;
+
+    .icon-wrapper {
+      background: $primary-color;
+      color: #fff;
+    }
+  }
+
+  .icon-wrapper {
+    width: 44px;
+    height: 44px;
+    background: $primary-light;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: $primary-color;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .content-wrapper {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      color: $text-sec;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+
+    /* 无缝输入框 */
+    .seamless-input {
+      width: 100%;
+
+      :deep(.el-input__wrapper),
+      :deep(.el-select__wrapper) {
+        box-shadow: none !important;
+        padding: 0;
+        background: transparent;
+        min-height: 28px;
+      }
+
+      :deep(.el-input__inner) {
+        font-size: 17px;
+        font-weight: 600;
+        color: $text-main;
+        height: 30px;
+        line-height: 30px;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+
+        &::placeholder {
+          font-weight: 400;
+          color: #cbd5e1;
+        }
+      }
+    }
+  }
+}
+
+/* 特殊：带抽屉的卡片 (SKU) */
+.standard-input-card.has-drawer {
+  height: auto; /* 允许高度扩展 */
+  min-height: 80px; /* 最小高度保持一致 */
+  flex-direction: column;
+  padding: 0;
+  align-items: stretch;
+  gap: 0;
+
+  .main-row {
+    height: 80px; /* ✅ 关键：主区域高度与其他卡片完全一致 */
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 20px;
+  }
+
+  .status-indicator {
+    margin-left: auto;
+  }
+
+  .bottom-drawer {
+    background: $bg-color;
+    border-top: 1px solid $border-color;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideDown 0.2s ease-out;
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: $text-main;
+      font-weight: 500;
+      .el-icon { color: $primary-color; }
+    }
+  }
+}
+
+/* 卖点面板 (Selling Points) */
+.selling-points-board {
+  background: #fff;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  padding: 24px;
+  transition: all 0.2s;
+
+  &:hover { border-color: #cbd5e1; }
+  &:focus-within { border-color: $primary-color; box-shadow: $shadow-sm; }
+
+  .board-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $text-sec;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    .el-icon { color: $warning-color; font-size: 16px; }
+  }
+
+  .tags-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    min-height: 40px;
+
+    .point-tag {
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: $text-main;
+      border-radius: 8px;
+      font-size: 14px;
+      :deep(.el-tag__close) { color: $text-sec; }
+      :deep(.el-tag__close:hover) { background-color: #ef4444; color: white; }
+    }
+
+    .ghost-input-tag {
+      width: 160px;
+      :deep(.el-input__wrapper) { box-shadow: none; background: transparent; padding: 0; }
+      :deep(.el-input__inner) { font-size: 14px; }
+    }
+  }
+
+  .quick-pick-bar {
+    border-top: 1px dashed $border-color;
+    padding-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+    .chip {
+      font-size: 12px;
+      padding: 6px 12px;
+      background: #f1f5f9;
+      border-radius: 100px;
+      color: $text-sec;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+
+      &:hover { background: $primary-light; color: $primary-color; border-color: #bfdbfe; }
+    }
+  }
+}
+
+/* --- 8. 步骤三：文案解析 (Step 3) --- */
 .hero-upload {
   :deep(.el-upload-dragger) {
     width: 100%; height: 200px; border: 2px dashed $border-color; border-radius: 12px;
@@ -269,245 +411,6 @@ $success-color: #10b981;
   }
 }
 
-/* --- 8. 步骤三：产品定义 (Step 3 - Redesigned) --- */
-
-.product-definition-container {
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.section-title-sm {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #94a3b8;
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
-}
-
-/* 垂直堆叠布局 */
-.field-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* 卡片之间的垂直间距 */
-}
-
-/* 统一的卡片输入框样式 */
-.field-card {
-  display: flex;
-  align-items: stretch;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0;
-  transition: all 0.2s ease-in-out;
-  overflow: hidden;
-  height: 80px; /* ✅ 核心修改：固定高度确保三者一致 */
-  width: 100%; /* ✅ 核心修改：宽度统一撑满 */
-
-  /* 卡片 Hover 效果 */
-  &:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-  }
-
-  /* 输入框聚焦时，整个卡片高亮 */
-  &:focus-within {
-    border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-
-    .icon-area {
-      background: #eff6ff;
-      color: $primary-color;
-    }
-  }
-
-  /* 左侧图标区域 */
-  .icon-area {
-    width: 60px; /* 固定宽度 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8fafc;
-    border-right: 1px solid #f1f5f9;
-    font-size: 22px; /* 图标统一大小 */
-    color: #64748b;
-    flex-shrink: 0;
-    transition: background-color 0.2s;
-  }
-
-  /* 右侧输入区域 */
-  .input-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 0 20px;
-    min-width: 0;
-
-    label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #94a3b8;
-      margin-bottom: 4px; /* Label 与 Input 的间距 */
-      display: block;
-      line-height: 1;
-      text-transform: uppercase;
-    }
-
-    /* 覆写 Element Plus Input 样式，使其"无边框化" */
-    .seamless-input {
-      width: 100%;
-
-      :deep(.el-input__wrapper) {
-        box-shadow: none !important;
-        background: transparent;
-        padding: 0;
-        height: 32px; /* 内部高度一致 */
-      }
-      :deep(.el-input__inner) {
-        font-size: 18px !important; /* ✅ 核心修改：字体大小一致 (特大) */
-        font-weight: 600 !important;
-        color: $text-main !important;
-        height: 32px !important;
-        line-height: 32px !important;
-        padding: 0;
-        font-family: 'Inter', sans-serif;
-
-        &::placeholder {
-          font-weight: 400;
-          color: #cbd5e1;
-          font-size: 16px;
-        }
-      }
-    }
-  }
-
-  /* 纵向布局模式 (用于卖点) - 高度自动 */
-  &.column-layout {
-    height: auto; /* 卖点卡片高度自适应 */
-    flex-direction: column;
-    padding: 16px;
-
-    .tags-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #64748b;
-      font-size: 13px;
-      margin-bottom: 12px;
-
-      .el-icon { color: #f59e0b; }
-    }
-
-    .tags-canvas {
-      min-height: 80px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
-
-      :deep(.el-tag) {
-        border-radius: 6px;
-        height: 32px;
-        padding: 0 12px;
-      }
-
-      .new-tag-input-ghost {
-        width: 120px;
-        :deep(.el-input__wrapper) {
-          box-shadow: none !important;
-          background: #f1f5f9;
-          border-radius: 6px;
-          padding: 0 10px;
-        }
-        :deep(.el-input__inner) {
-          font-size: 13px;
-        }
-      }
-    }
-
-    .quick-tags-bar {
-      border-top: 1px dashed #e2e8f0;
-      padding-top: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .label { font-size: 11px; color: #94a3b8; font-weight: 600; }
-      .pills {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-
-        .pill {
-          font-size: 11px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          padding: 4px 10px;
-          border-radius: 20px;
-          cursor: pointer;
-          color: #475569;
-          transition: all 0.2s;
-
-          &:hover {
-            background: #eff6ff;
-            color: $primary-color;
-            border-color: #bfdbfe;
-          }
-        }
-      }
-    }
-  }
-}
-
-.field-wrapper {
-  margin-bottom: 0;
-}
-
-/* --- ✅ 新增：条码预览区域样式 --- */
-.barcode-preview-area {
-  margin-top: 8px;
-  padding: 0 4px;
-  animation: slideDown 0.3s ease-out;
-
-  .barcode-card {
-    display: flex;
-    align-items: center;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 10px 14px;
-    gap: 12px;
-
-    .icon-box {
-      width: 36px;
-      height: 36px;
-      background: #fff;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: $primary-color;
-      font-size: 18px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .info {
-      flex: 1;
-      .label { display: block; font-size: 10px; color: $text-sec; font-weight: 600; text-transform: uppercase; }
-      .filename { display: block; font-size: 12px; color: $text-main; font-weight: 600; word-break: break-all;}
-    }
-
-    .view-btn {
-      font-size: 12px;
-      padding: 6px 12px;
-    }
-  }
-}
-@keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-
-
 /* --- 9. 步骤四：准备生成 (Step 4) --- */
 .centered-panel { text-align: center; .panel-card { border: none; box-shadow: none; background: transparent; } }
 .success-visual { position: relative; width: 80px; height: 80px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;
@@ -520,210 +423,46 @@ $success-color: #10b981;
 
 /* --- 10. 步骤五：完成页 (Success Page) --- */
 .success-page {
-  text-align: center;
-  padding: 40px 20px;
-  animation: slideUp 0.5s ease-out;
-
-  .success-banner {
-    width: 120px;
-    height: 120px;
-    background: #ecfdf5;
-    border-radius: 50%;
-    margin: 0 auto 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: $success-color;
-    font-size: 60px;
-    box-shadow: 0 10px 30px -10px rgba($success-color, 0.3);
-  }
-
+  text-align: center; padding: 40px 20px; animation: slideUp 0.5s ease-out;
+  .success-banner { width: 120px; height: 120px; background: #ecfdf5; border-radius: 50%; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center; color: $success-color; font-size: 60px; box-shadow: 0 10px 30px -10px rgba($success-color, 0.3); }
   h2 { font-size: 32px; color: $text-main; margin: 0 0 10px 0; font-weight: 800; letter-spacing: -1px; }
   .sub-msg { font-size: 16px; color: $text-sec; margin-bottom: 40px; }
-
-  /* ✅ 优化后的 File Card 样式 */
-  .file-card {
-    background: white;
-    border: 1px solid $border-color;
-    border-radius: 20px;
-    padding: 24px;
-    max-width: 650px; /* ✅ 1. 加宽容器，原来是 520px */
-    width: 100%;
-    margin: 0 auto 40px;
-    display: flex;
-    align-items: center; /* ✅ 2. 恢复垂直居中，因为单行显示更整齐 */
-    gap: 20px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.1);
-      border-color: $primary-color;
+  .file-card { background: white; border: 1px solid $border-color; border-radius: 20px; padding: 24px; max-width: 650px; width: 100%; margin: 0 auto 40px; display: flex; align-items: center; gap: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    &:hover { transform: translateY(-4px); box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.1); border-color: $primary-color; }
+    .file-icon { font-size: 36px; color: $primary-color; background: #eff6ff; width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .file-info { text-align: left; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; padding-top: 0;
+      .fname { display: block; font-weight: 700; color: $text-main; margin-bottom: 0; font-size: 15px; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     }
-
-    .file-icon {
-      font-size: 36px;
-      color: $primary-color;
-      background: #eff6ff;
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .file-info {
-      text-align: left;
-      flex: 1;
-      min-width: 0; /* 关键：允许 flex 子项收缩 */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding-top: 0;
-
-      .fname {
-        display: block;
-        font-weight: 700;
-        color: $text-main;
-        margin-bottom: 0;
-        font-size: 15px;
-        line-height: 1.5;
-
-        /* ✅ 3. 核心修改：单行不换行 + 省略号 */
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-
-    /* 按钮在右侧垂直居中 */
-    .re-download-btn {
-      align-self: center;
-      flex-shrink: 0;
-    }
+    .re-download-btn { align-self: center; flex-shrink: 0; }
   }
-
-  .action-area {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    .btn-lg { width: 160px; height: 48px; font-size: 15px; font-weight: 600; border-radius: 10px; }
-  }
+  .action-area { display: flex; justify-content: center; gap: 20px; .btn-lg { width: 160px; height: 48px; font-size: 15px; font-weight: 600; border-radius: 10px; } }
 }
 
-/* --- 11. 现代化进度弹窗 (Progress Dialog) --- */
+/* --- 11. 进度弹窗 --- */
 .design-gen-dialog {
-  border-radius: 24px !important;
-  overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-
-  :deep(.el-dialog__header) {
-    margin: 0;
-    padding: 0;
-    border-bottom: 1px solid $border-color;
-  }
-  :deep(.el-dialog__body) {
-    padding: 0;
-  }
+  border-radius: 24px !important; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  :deep(.el-dialog__header) { margin: 0; padding: 0; border-bottom: 1px solid $border-color; }
+  :deep(.el-dialog__body) { padding: 0; }
 }
-
-.dialog-header-custom {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  background: #f8fafc;
-
-  .icon-pulse {
-    color: $primary-color;
-    font-size: 20px;
-    animation: spin 3s linear infinite;
-  }
-
-  .header-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: $text-main;
-    letter-spacing: 0.5px;
-  }
-}
-
+.dialog-header-custom { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 20px; background: #f8fafc; .icon-pulse { color: $primary-color; font-size: 20px; animation: spin 3s linear infinite; } .header-title { font-size: 16px; font-weight: 700; color: $text-main; letter-spacing: 0.5px; } }
 .progress-dialog-content {
-  padding: 40px 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-
-  .progress-ring-wrapper {
-    position: relative;
-    margin-bottom: 24px;
-
-    .ring-inner-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      align-items: baseline;
-      justify-content: center;
-
-      .number { font-size: 36px; font-weight: 800; color: $text-main; line-height: 1; letter-spacing: -1px; }
-      .symbol { font-size: 14px; font-weight: 600; color: $text-sec; margin-left: 2px; }
-    }
-  }
-
-  .status-box {
-    .status-main { font-size: 18px; font-weight: 700; color: $text-main; margin: 0 0 6px 0; }
-    .status-sub { font-size: 13px; color: $text-sec; margin: 0; }
-  }
+  padding: 40px 30px; display: flex; flex-direction: column; align-items: center; text-align: center;
+  .progress-ring-wrapper { position: relative; margin-bottom: 24px; .ring-inner-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: baseline; justify-content: center; .number { font-size: 36px; font-weight: 800; color: $text-main; line-height: 1; letter-spacing: -1px; } .symbol { font-size: 14px; font-weight: 600; color: $text-sec; margin-left: 2px; } } }
+  .status-box { .status-main { font-size: 18px; font-weight: 700; color: $text-main; margin: 0 0 6px 0; } .status-sub { font-size: 13px; color: $text-sec; margin: 0; } }
 }
 
-/* --- 12. 底部导航栏 (Footer) --- */
+/* --- 12. 底部导航栏 --- */
 .workflow-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #fff;
-  border-top: 1px solid $border-color;
-  padding: 16px 0;
-  z-index: 100;
-
-  .footer-inner {
-    max-width: 800px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 20px;
-    align-items: center;
-  }
-
-  .nav-btn {
-    min-width: 120px;
-    height: 44px;
-    font-weight: 600;
-
-    &.primary {
-      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
-    }
-
-    &.finish-btn {
-      background: $success-color;
-      border-color: $success-color;
-      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-    }
-  }
+  position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid $border-color; padding: 16px 0; z-index: 100;
+  .footer-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; padding: 0 20px; align-items: center; }
+  .nav-btn { min-width: 120px; height: 44px; font-weight: 600; &.primary { box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); } &.finish-btn { background: $success-color; border-color: $success-color; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); } }
 }
 
-/* --- 13. 动画 (Animations) --- */
+/* --- 13. 动画 --- */
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
 .slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1); }
 .slide-fade-enter-from { opacity: 0; transform: translateY(10px); }
 .slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }

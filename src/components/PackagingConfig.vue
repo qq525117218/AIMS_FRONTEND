@@ -70,165 +70,135 @@
               </div>
             </div>
 
-            <div v-else-if="activeStep === 1" key="step2-product" class="step-panel marketing-panel">
+            <div v-else-if="activeStep === 1" key="step2-product" class="step-panel product-def-panel">
               <div class="panel-header">
                 <h2>产品定义</h2>
-                <p>确立产品的视觉基调与核心卖点。</p>
+                <p>请按顺序完善产品的核心身份信息与规格参数。</p>
               </div>
 
-              <div class="product-definition-container">
+              <div class="vertical-stack-container">
 
-                <div class="section-title-sm">产品身份 Identity</div>
-
-                <div class="field-stack">
-
-                  <el-form-item prop="marketing.brand" class="field-wrapper">
-                    <div class="field-card">
-                      <div class="icon-area"><el-icon><Trophy /></el-icon></div>
-                      <div class="input-area">
-                        <label>品牌名称 Brand Name</label>
-                        <el-select
-                            v-model="formData.marketing.brand"
-                            placeholder="选择或输入品牌"
-                            class="seamless-input"
-                            filterable
-                            clearable
-                            allow-create
-                            default-first-option
-                            @change="handleBrandChange"
-                        >
-                          <el-option
-                              v-for="item in brandOptions"
-                              :key="item.id"
-                              :label="`${item.name} - ${item.brand_category_name || 'Unknown'}`"
-                              :value="item.name"
-                          />
-                        </el-select>
-                      </div>
+                <el-form-item prop="marketing.brand" class="stack-item">
+                  <div class="standard-input-card">
+                    <div class="icon-wrapper"><el-icon><Trophy /></el-icon></div>
+                    <div class="content-wrapper">
+                      <label>品牌名称 Brand</label>
+                      <el-select
+                          v-model="formData.marketing.brand"
+                          placeholder="选择或输入品牌"
+                          class="seamless-input"
+                          filterable
+                          allow-create
+                          default-first-option
+                          @change="handleBrandChange"
+                      >
+                        <el-option
+                            v-for="item in brandOptions"
+                            :key="item.id"
+                            :label="`${item.name} - ${item.brand_category_name || '通用'}`"
+                            :value="item.name"
+                        />
+                      </el-select>
                     </div>
-                  </el-form-item>
+                  </div>
+                </el-form-item>
 
-                  <el-form-item class="field-wrapper">
-                    <div class="field-card">
-                      <div class="icon-area"><el-icon><OfficeBuilding /></el-icon></div>
-                      <div class="input-area">
-                        <label>制造商 Manufacturer</label>
-                        <el-input v-model="formData.content.manufacturer" placeholder="自动获取或手动输入" class="seamless-input" clearable />
-                      </div>
+                <el-form-item class="stack-item">
+                  <div class="standard-input-card">
+                    <div class="icon-wrapper"><el-icon><OfficeBuilding /></el-icon></div>
+                    <div class="content-wrapper">
+                      <label>制造商 Manufacturer</label>
+                      <el-input v-model="formData.content.manufacturer" placeholder="自动关联或手动输入" class="seamless-input" />
                     </div>
-                  </el-form-item>
+                  </div>
+                </el-form-item>
 
-                  <el-form-item class="field-wrapper">
-                    <div class="field-card">
-                      <div class="icon-area"><el-icon><Location /></el-icon></div>
-                      <div class="input-area">
-                        <label>制造商地址 Manufacturer Address</label>
-                        <el-input v-model="formData.content.address" placeholder="自动获取或手动输入" class="seamless-input" clearable />
-                      </div>
+                <el-form-item class="stack-item">
+                  <div class="standard-input-card">
+                    <div class="icon-wrapper"><el-icon><Location /></el-icon></div>
+                    <div class="content-wrapper">
+                      <label>产地地址 Address</label>
+                      <el-input v-model="formData.content.address" placeholder="自动关联或手动输入" class="seamless-input" />
                     </div>
-                  </el-form-item>
+                  </div>
+                </el-form-item>
 
-                  <el-form-item prop="marketing.sku" class="field-wrapper">
-                    <div class="field-card">
-                      <div class="icon-area"><el-icon><Ticket /></el-icon></div>
-                      <div class="input-area">
+                <el-form-item prop="marketing.sku" class="stack-item">
+                  <div class="standard-input-card has-drawer">
+                    <div class="main-row">
+                      <div class="icon-wrapper"><el-icon><Ticket /></el-icon></div>
+                      <div class="content-wrapper">
                         <label>商品编码 SKU</label>
                         <el-input
                             v-model="formData.marketing.sku"
                             placeholder="例如：SKU-2024-X01"
                             class="seamless-input"
-                            clearable
                             @change="handleFetchBarcode"
                         />
                       </div>
-                    </div>
-
-                    <div v-if="isFetchingBarcode || barcodeUrl" class="barcode-preview-area">
-                      <div v-if="isFetchingBarcode" style="padding: 10px; text-align: center;">
-                        <el-icon class="is-loading"><Loading /></el-icon> <span style="font-size: 12px; color: #94a3b8; margin-left: 6px;">正在查找条码文件...</span>
-                      </div>
-                      <div v-else-if="barcodeUrl" class="barcode-card">
-                        <div class="icon-box"><el-icon><DocumentChecked /></el-icon></div>
-                        <div class="info">
-                          <span class="label">商品条码 BARCODE FIle</span>
-                          <span class="filename">{{ barcodeUrl.split('/').pop() }}</span>
-                        </div>
-                        <el-button
-                            type="primary"
-                            link
-                            class="view-btn"
-                            :icon="Link"
-                            tag="a"
-                            :href="barcodeUrl"
-                            target="_blank"
-                        >
-                          预览
-                        </el-button>
+                      <div class="status-indicator">
+                        <el-tag v-if="barcodeUrl" type="success" effect="dark" round size="small">已关联条码</el-tag>
+                        <el-tag v-else-if="isFetchingBarcode" type="warning" effect="plain" round size="small">查找中...</el-tag>
+                        <el-tag v-else type="info" effect="plain" round size="small">未关联</el-tag>
                       </div>
                     </div>
-                  </el-form-item>
-
-                  <el-form-item prop="marketing.capacityValue" class="field-wrapper">
-                    <div class="field-card">
-                      <div class="icon-area"><el-icon><DataLine /></el-icon></div>
-                      <div class="input-area">
-                        <label>含量（正面）Spec (Front)</label>
-                        <el-input v-model="formData.marketing.capacityValue" placeholder="例如：500ml / 100g" class="seamless-input" clearable />
-                      </div>
+                    <div v-if="barcodeUrl" class="bottom-drawer">
+                      <div class="file-info"><el-icon><Picture /></el-icon><span>{{ barcodeUrl.split('/').pop() }}</span></div>
+                      <el-link type="primary" :underline="false" :href="barcodeUrl" target="_blank">预览 <el-icon><Link /></el-icon></el-link>
                     </div>
-                  </el-form-item>
+                  </div>
+                </el-form-item>
 
-                  <el-form-item prop="marketing.capacityValueBack" class="field-wrapper">
-                    <div class="field-card">
-                      <div class="icon-area"><el-icon><DataLine /></el-icon></div>
-                      <div class="input-area">
-                        <label>含量（背面） Spec (Back)</label>
-                        <el-input v-model="formData.marketing.capacityValueBack" placeholder="例如：500ml / 100g" class="seamless-input" clearable />
-                      </div>
+                <el-form-item prop="marketing.capacityValue" class="stack-item">
+                  <div class="standard-input-card">
+                    <div class="icon-wrapper"><el-icon><Monitor /></el-icon></div>
+                    <div class="content-wrapper">
+                      <label>正面含量 Net Wt (Front)</label>
+                      <el-input v-model="formData.marketing.capacityValue" placeholder="例如：100g / 3.5oz" class="seamless-input" />
                     </div>
-                  </el-form-item>
+                  </div>
+                </el-form-item>
 
-                </div>
-
-                <div class="section-title-sm" style="margin-top: 30px;">正面卖点文案 Selling Points</div>
-
-                <el-form-item prop="marketing.sellingPoints" class="field-wrapper">
-                  <div class="field-card column-layout">
-                    <div class="tags-header">
-                      <el-icon><Star /></el-icon>
-                      <span>输入能够打动消费者的产品特性 (回车添加)</span>
+                <el-form-item prop="marketing.capacityValueBack" class="stack-item">
+                  <div class="standard-input-card">
+                    <div class="icon-wrapper"><el-icon><Document /></el-icon></div>
+                    <div class="content-wrapper">
+                      <label>背面含量 Net Wt (Back)</label>
+                      <el-input v-model="formData.marketing.capacityValueBack" placeholder="同上或不同" class="seamless-input" />
                     </div>
+                  </div>
+                </el-form-item>
 
-                    <div class="tags-canvas">
+                <el-form-item prop="marketing.sellingPoints" class="stack-item" style="margin-top: 10px;">
+                  <div class="selling-points-board">
+                    <div class="board-header">
+                      <el-icon><StarFilled /></el-icon> <span>核心卖点 Selling Points</span>
+                    </div>
+                    <div class="tags-area">
                       <el-tag
                           v-for="tag in formData.marketing.sellingPoints"
                           :key="tag"
                           closable
-                          type="primary"
-                          size="large"
+                          effect="light"
+                          class="point-tag"
                           @close="handleCloseTag(tag)"
                       >
                         {{ tag }}
                       </el-tag>
-
                       <el-input
-                          v-if="formData.marketing.sellingPoints.length < 5"
+                          v-if="formData.marketing.sellingPoints.length < 6"
                           v-model="inputValue"
-                          class="new-tag-input-ghost"
-                          placeholder="+ Add Point"
+                          class="ghost-input-tag"
+                          placeholder="+ 输入卖点回车"
                           @keyup.enter="handleInputConfirm"
                           @blur="handleInputConfirm"
                       />
                     </div>
-
-                    <div class="quick-tags-bar">
-                      <span class="label">快速推荐:</span>
-                      <div class="pills">
-                        <span class="pill" @click="addQuickTag('Eco-Friendly')">🌿 Eco-Friendly</span>
-                        <span class="pill" @click="addQuickTag('Organic')">🥬 Organic</span>
-                        <span class="pill" @click="addQuickTag('Premium Quality')">💎 Premium</span>
-                        <span class="pill" @click="addQuickTag('Long Lasting')">⏳ Long Lasting</span>
-                      </div>
+                    <div class="quick-pick-bar">
+                      <span class="label">推荐:</span>
+                      <span class="chip" @click="addQuickTag('Eco-Friendly')">🌿 Eco-Friendly</span>
+                      <span class="chip" @click="addQuickTag('Organic')">🥬 Organic</span>
+                      <span class="chip" @click="addQuickTag('Cruelty Free')">🐰 Cruelty Free</span>
                     </div>
                   </div>
                 </el-form-item>
@@ -335,13 +305,12 @@
 </template>
 
 <script lang="ts" setup>
-import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, DataLine, Select, Files, MagicStick, Download, Star, OfficeBuilding, Location, Link, Loading } from '@element-plus/icons-vue'
+import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, DataLine, Select, Files, MagicStick, Download, Star, OfficeBuilding, Location, Link, Loading, Medal, DataBoard, Monitor, Document, StarFilled, Picture } from '@element-plus/icons-vue'
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 
 defineProps<{ username: string }>()
 defineEmits(['logout'])
 
-// ✅ 解构保持不变，逻辑层已经处理了新的数据字段
 const {
   activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
   isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl, generatedFileName,
