@@ -315,14 +315,19 @@ import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, Select
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 
 defineProps<{ username: string }>()
-defineEmits(['logout'])
 
+// ✅ 1. 获取 emit 实例 (用于触发父组件事件)
+const emit = defineEmits(['logout'])
+
+// ✅ 2. 将 logout 回调传入 Hook
+// 这样当 usePackagingConfig 内部检测到 401 时，就会调用这个箭头函数，进而通知 App.vue 退出登录
 const {
   activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
   isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl, generatedFileName,
   isFetchingBarcode, barcodeUrl,
   nextStep, prevStep, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload, resetWorkflow, handleBrandChange, handleFetchBarcode
-} = usePackagingConfig()
+} = usePackagingConfig(() => emit('logout'))
+
 </script>
 
 <style scoped lang="scss" src="../styles/PackagingConfig.scss"></style>

@@ -1,7 +1,8 @@
+// src/logic/useLogin.ts
 import { reactive, ref } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { authFetch } from '../utils/request' // ✅ 引入
 
-// 1. 定义接口响应类型 (匹配新JSON)
 export interface LoginResponse {
     code: number
     is_success: boolean
@@ -33,12 +34,10 @@ export function useLogin(emit: (event: 'login-success', username: string) => voi
         await formRef.value.validate(async (valid) => {
             if (valid) {
                 isLoading.value = true
-
                 try {
-                    // 2. 修改接口地址: /api/Auth/login -> /api/auth/login
-                    const response = await fetch('/api/auth/login', {
+                    // ✅ 使用 authFetch (它会自动处理 Headers，虽然登录接口不需要 Token，但用了也无妨)
+                    const response = await authFetch('/api/auth/login', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             username: loginForm.username,
                             password: loginForm.password
@@ -49,19 +48,19 @@ export function useLogin(emit: (event: 'login-success', username: string) => voi
 
                     if (resData.code === 200 && resData.is_success) {
                         ElMessage.success(resData.message || '登录成功')
-
-                        // 存储 Token
                         localStorage.setItem('token', resData.data.token)
                         localStorage.setItem('username', loginForm.username)
                         localStorage.setItem('token_expire', resData.data.expire_at)
-
                         emit('login-success', loginForm.username)
                     } else {
-                        ElMessage.error(resData.message || '登录失败，请检查账号密码')
+                        ElMessage.error(resData.message || '登录失败')
                     }
-                } catch (error) {
+                } catch (error: any) {
                     console.error(error)
-                    ElMessage.error('网络连接异常，请检查后端服务是否启动')
+                    // authFetch 会抛出 'Unauthorized' 错误，这里可以忽略或特殊处理
+                    if (error.message !== 'Unauthorized') {
+                        ElMessage.error('网络连接异常或服务不可用')
+                    }
                 } finally {
                     isLoading.value = false
                 }
@@ -69,11 +68,5 @@ export function useLogin(emit: (event: 'login-success', username: string) => voi
         })
     }
 
-    return {
-        formRef,
-        isLoading,
-        loginForm,
-        rules,
-        handleLogin
-    }
+    return { formRef, isLoading, loginForm, rules, handleLogin }
 }
