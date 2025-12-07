@@ -8,26 +8,59 @@ const isLoggedIn = ref(false)
 const currentUser = ref('')
 
 onMounted(() => {
+  checkLoginStatus()
+})
+
+// 检查本地登录状态及有效性
+const checkLoginStatus = () => {
   const token = localStorage.getItem('token')
   const savedUser = localStorage.getItem('username')
+  const expireStr = localStorage.getItem('token_expire')
+
   if (token && savedUser) {
+    // 检查是否过期
+    if (expireStr) {
+      const expireTime = new Date(expireStr).getTime()
+      const now = new Date().getTime()
+
+      // 如果当前时间已超过过期时间，视为会话失效
+      if (now >= expireTime) {
+        handleLogout(true) // true 表示被动过期
+        return
+      }
+    }
+
+    // 校验通过，恢复登录状态
     isLoggedIn.value = true
     currentUser.value = savedUser
+  } else {
+    // 数据不完整，清理残留
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+    localStorage.removeItem('token_expire')
+    isLoggedIn.value = false
   }
-})
+}
 
 const onLoginSuccess = (username: string) => {
   currentUser.value = username
   isLoggedIn.value = true
 }
 
-// --- 核心修改：处理退出登录 ---
-const handleLogout = async () => {
+/**
+ * 处理登出逻辑
+ * @param isSessionExpired - 是否因为会话过期/401导致的退出。
+ * true: 不调后端接口，提示过期；
+ * false: 调后端接口，提示安全退出。
+ */
+const handleLogout = async (isSessionExpired = false) => {
   const token = localStorage.getItem('token')
 
-  if (token) {
+  // 仅在主动退出且本地有 Token 时尝试通知后端
+  // 如果是过期(isSessionExpired=true)，说明 Token 大概率已失效，无需调用
+  if (token && !isSessionExpired) {
     try {
-      // 1. 修改接口地址: /api/Auth/logout -> /api/auth/logout
+      // 注意：这里没有使用 authFetch，避免 401 再次触发死循环
       await fetch('/api/auth/logout', {
         method: 'POST',
         headers: {
@@ -35,20 +68,26 @@ const handleLogout = async () => {
           'Authorization': `Bearer ${token}`
         }
       })
-      // 可以添加 res.is_success 判断，但退出通常是强制的
     } catch (error) {
-      console.warn('后端注销接口调用失败，将强制清理本地缓存', error)
+      console.warn('后端注销接口调用失败，仅清理本地缓存', error)
     }
   }
 
+  // 核心：清理本地存储
   localStorage.removeItem('token')
   localStorage.removeItem('username')
-  localStorage.removeItem('token_expire') // 顺便清理过期时间
+  localStorage.removeItem('token_expire')
 
+  // 重置状态 -> 触发 v-if 切换回 LoginView
   isLoggedIn.value = false
   currentUser.value = ''
 
-  ElMessage.success('已安全退出')
+  // 根据情况提示用户
+  if (isSessionExpired) {
+    ElMessage.warning('登录会话已过期，请重新登录')
+  } else {
+    ElMessage.success('已安全退出')
+  }
 }
 </script>
 
@@ -62,19 +101,20 @@ const handleLogout = async () => {
     <PackagingConfig
         v-else
         :username="currentUser"
-        @logout="handleLogout"
+        @logout="() => handleLogout(false)"
     />
   </transition>
 </template>
 
 <style>
-/* ... 保持原有样式 ... */
+/* 全局样式或保留原有的 body 样式 */
 body {
   margin: 0;
   padding: 0;
   background-color: #f8fafc;
 }
 
+/* 简单的淡入淡出过渡动画 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;

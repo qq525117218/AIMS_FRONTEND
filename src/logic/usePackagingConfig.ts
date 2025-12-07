@@ -133,7 +133,8 @@ interface ProgressResponse {
 }
 
 // --- 主要逻辑 Hook ---
-export function usePackagingConfig() {
+// [修改] 接收 onUnauthorized 回调参数
+export function usePackagingConfig(onUnauthorized: () => void) {
     const activeStep = ref(0)
     const formRef = ref<FormInstance>()
     const isDocParsed = ref(false)
@@ -191,6 +192,39 @@ export function usePackagingConfig() {
         'marketing.capacityValueBack': [{ required: true, message: '请输入背面规格', trigger: 'blur' }]
     })
 
+    // [新增] 鉴权 Fetch 封装
+    const authFetch = async (url: string, options: RequestInit = {}) => {
+        const token = localStorage.getItem('token')
+
+        // 1. 本地无 Token，直接退出
+        if (!token) {
+            console.warn('No Access Token found locally.')
+            onUnauthorized()
+            throw new Error('No Access Token')
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            ...(options.headers || {})
+        }
+
+        try {
+            const response = await fetch(url, { ...options, headers })
+
+            // 2. 拦截 401 Unauthorized
+            if (response.status === 401) {
+                console.warn('Received 401 Unauthorized from server.')
+                onUnauthorized() // 触发登出
+                throw new Error('Unauthorized') // 中断后续代码
+            }
+
+            return response
+        } catch (error) {
+            throw error
+        }
+    }
+
     // 步骤验证配置
     const stepValidationConfig: Record<number, string[]> = {
         0: ['dimensions.length', 'dimensions.width', 'dimensions.height'],
@@ -241,16 +275,15 @@ export function usePackagingConfig() {
         const loadingInstance = ElLoading.service({ text: 'AI 解析中...', background: 'rgba(255,255,255,0.8)' })
         try {
             const base64String = await fileToBase64(file.raw)
-            const response = await fetch('/api/document/parse/word', {
+            // [修改] 使用 authFetch
+            const response = await authFetch('/api/document/parse/word', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ file_name: file.name, file_content_base64: base64String })
             })
             const resData = (await response.json()) as ParseDocResponse
 
             if (response.ok && resData.code === 200 && resData.is_success && resData.data) {
                 const parsed = resData.data.content
-                // 解析逻辑保持更新 content 字段 (代表工厂侧数据)
                 Object.assign(formData.content, {
                     productName: parsed.product_name || '',
                     manufacturer: parsed.manufacturer || '',
@@ -266,7 +299,10 @@ export function usePackagingConfig() {
                 ElMessage.success('解析成功')
             } else { throw new Error('解析失败') }
         } catch (error: any) {
-            ElMessage.error(error.message || '解析异常')
+            // [修改] 忽略 Unauthorized 错误，避免重复提示
+            if (error.message !== 'Unauthorized') {
+                ElMessage.error(error.message || '解析异常')
+            }
             isDocParsed.value = false
         } finally { loadingInstance.close() }
     }
@@ -292,26 +328,21 @@ export function usePackagingConfig() {
 
         const loading = ElLoading.service({ text: '正在获取品牌制造商信息...', background: 'rgba(255,255,255,0.6)' })
         try {
-            const token = localStorage.getItem('token')
-            const response = await fetch('/api/plm/brand/detail', {
+            // [修改] 使用 authFetch
+            const response = await authFetch('/api/plm/brand/detail', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token ? `Bearer ${token}` : ''
-                },
                 body: JSON.stringify({ code: brand.code })
             })
             const resData = await response.json() as BrandDetailResponse
 
             if (resData.is_success && resData.data?.default_manufacturer) {
-                // [Core Change] 品牌选择更新 marketing 字段 (代表品牌/经销商信息)
                 formData.marketing.manufacturer = resData.data.default_manufacturer.manufacturer_english_name || ''
                 formData.marketing.address = resData.data.default_manufacturer.manufacturer_english_address || ''
                 ElMessage.success('已更新品牌方信息')
             }
         } catch (error) {
             console.error('Fetch brand detail failed', error)
-            ElMessage.warning('获取品牌信息失败，请手动输入')
+            // 静默失败或提示
         } finally {
             loading.close()
         }
@@ -326,13 +357,9 @@ export function usePackagingConfig() {
         isFetchingBarcode.value = true
 
         try {
-            const token = localStorage.getItem('token')
-            const response = await fetch('/api/plm/product/barcode', {
+            // [修改] 使用 authFetch
+            const response = await authFetch('/api/plm/product/barcode', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token ? `Bearer ${token}` : ''
-                },
                 body: JSON.stringify({ code: skuCode })
             })
 
@@ -361,7 +388,6 @@ export function usePackagingConfig() {
         progressMessage.value = '正在提交生成任务...'
 
         try {
-            const token = localStorage.getItem('token')
             const username = localStorage.getItem('username') || 'User'
 
             // --- 构建 Payload ---
@@ -380,18 +406,15 @@ export function usePackagingConfig() {
                             capacity_info: formData.marketing.capacityValue,
                             capacity_info_back: formData.marketing.capacityValueBack,
                             selling_points: formData.marketing.sellingPoints,
-                            // [Core Change] main_panel 使用 marketing 数据 (品牌方/经销商)
                             manufacturer: formData.marketing.manufacturer,
                             address: formData.marketing.address
                         },
                         info_panel: {
                             ingredients: formData.content.ingredients,
-                            // [Core Change] info_panel 使用 content 数据 (解析出的实际工厂/文档数据)
                             manufacturer: formData.content.manufacturer,
                             origin: formData.content.origin,
                             warnings: formData.content.warnings,
                             directions: formData.content.directions,
-                            // [Core Change] 同上
                             address: formData.content.address
                         }
                     },
@@ -405,9 +428,9 @@ export function usePackagingConfig() {
                 }
             }
 
-            const submitRes = await fetch('/api/design/generate/psd/async', {
+            // [修改] 使用 authFetch
+            const submitRes = await authFetch('/api/design/generate/psd/async', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' },
                 body: JSON.stringify(payload)
             })
 
@@ -418,26 +441,29 @@ export function usePackagingConfig() {
             const taskId = submitData.data
             currentTaskId.value = taskId
 
-            await pollProgress(taskId, token, payload.project_name)
+            await pollProgress(taskId, payload.project_name)
 
         } catch (error: any) {
-            console.error('Task Failed:', error)
-            progressStatus.value = 'exception'
-            progressMessage.value = `错误: ${error.message || '未知错误'}`
-            ElMessage.error('生成失败')
-            setTimeout(() => { isGenerating.value = false }, 3000)
+            // [修改] 忽略 Unauthorized
+            if (error.message !== 'Unauthorized') {
+                console.error('Task Failed:', error)
+                progressStatus.value = 'exception'
+                progressMessage.value = `错误: ${error.message || '未知错误'}`
+                ElMessage.error('生成失败')
+                setTimeout(() => { isGenerating.value = false }, 3000)
+            }
         }
     }
 
-    const pollProgress = async (taskId: string, token: string | null, defaultName: string) => {
+    const pollProgress = async (taskId: string, defaultName: string) => {
         return new Promise<void>((resolve, reject) => {
             const timer = setInterval(async () => {
                 try {
-                    const res = await fetch(`/api/design/progress/${taskId}`, {
-                        headers: { 'Authorization': token ? `Bearer ${token}` : '' }
-                    })
-                    if (!res.ok) throw new Error('无法获取任务进度')
-                    const resData = (await res.json()) as ProgressResponse
+                    // [修改] 使用 authFetch
+                    const QX = await authFetch(`/api/design/progress/${taskId}`)
+
+                    if (!QX.ok) throw new Error('无法获取任务进度')
+                    const resData = (await QX.json()) as ProgressResponse
                     const task = resData.data
 
                     progressPercentage.value = task.progress
@@ -493,10 +519,9 @@ export function usePackagingConfig() {
     }
 
     const fetchBrandList = async () => {
-        const token = localStorage.getItem('token')
-        if(!token) return
         try {
-            const response = await fetch('/api/plm/brand/list', { headers: { 'Authorization': `Bearer ${token}` } })
+            // [修改] 使用 authFetch
+            const response = await authFetch('/api/plm/brand/list')
             const resData = await response.json() as BrandListResponse
             if (resData.is_success) brandOptions.value = resData.data.plm_brand_data
         } catch (e) { console.error(e) }

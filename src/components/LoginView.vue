@@ -48,7 +48,7 @@
       </el-form>
 
       <div class="footer-text">
-        &copy; 2024 Packaging Tech. All rights reserved.
+        &copy; 2025 Packaging Tech. All rights reserved.
       </div>
     </div>
   </div>
