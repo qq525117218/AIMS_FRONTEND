@@ -19,6 +19,7 @@ export interface Content {
     shelfLife: string;
     address: string;      // 实际生产地址 (Factory Address)
     directions: string;
+    benefits: string;     // [新增] 产品功效
 }
 
 // Marketing 接口：对应 Step 2 产品定义的数据 (通常是品牌方/经销商信息)
@@ -54,6 +55,7 @@ interface ParseDocResponse {
             shelf_life: string
             address: string
             directions: string
+            benefits: string // [新增]
             ingredients: {
                 active_ingredients: string
                 inactive_ingredients: string
@@ -158,7 +160,8 @@ export function usePackagingConfig(onUnauthorized: () => void) {
         dimensions: { length: 6, width: 6, height: 12, bleedX: 0.5, bleedY: 2, bleedInner: 0.15 },
         content: {
             productName: '', ingredients: '', warnings: '', manufacturer: '',
-            origin: '', shelfLife: '', address: '', directions: ''
+            origin: '', shelfLife: '', address: '', directions: '',
+            benefits: '' // [新增] 初始化
         },
         marketing: {
             sku: 'SKU00001885',
@@ -292,6 +295,7 @@ export function usePackagingConfig(onUnauthorized: () => void) {
                     shelfLife: parsed.shelf_life || '',
                     address: parsed.address || '',
                     directions: parsed.directions || '',
+                    benefits: parsed.benefits || '', // [新增] 映射解析结果
                     ingredients: parsed.ingredients?.raw_text || (parsed.ingredients?.active_ingredients ? `Active: ${parsed.ingredients.active_ingredients}\n` : '') + (parsed.ingredients?.inactive_ingredients ? `Inactive: ${parsed.ingredients.inactive_ingredients}` : '')
                 })
                 fileName.value = file.name
@@ -402,7 +406,6 @@ export function usePackagingConfig(onUnauthorized: () => void) {
                     texts: {
                         main_panel: {
                             brand_name: formData.marketing.brand,
-                            product_name: formData.content.productName,
                             capacity_info: formData.marketing.capacityValue,
                             capacity_info_back: formData.marketing.capacityValueBack,
                             selling_points: formData.marketing.sellingPoints,
@@ -410,12 +413,15 @@ export function usePackagingConfig(onUnauthorized: () => void) {
                             address: formData.marketing.address
                         },
                         info_panel: {
+                            product_name: formData.content.productName,
+                            shelf_life: formData.content.shelfLife,
                             ingredients: formData.content.ingredients,
                             manufacturer: formData.content.manufacturer,
                             origin: formData.content.origin,
                             warnings: formData.content.warnings,
                             directions: formData.content.directions,
-                            address: formData.content.address
+                            address: formData.content.address,
+                            benefits: formData.content.benefits
                         }
                     },
                     dynamic_images: {
