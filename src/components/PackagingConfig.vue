@@ -47,25 +47,113 @@
             hide-required-asterisk
         >
           <transition name="slide-fade" mode="out-in">
-            <div v-if="activeStep === 0" key="step1" class="step-panel">
-              <div class="panel-header"><h2>定义包装规格</h2><p>设定包装盒的物理切割尺寸与印刷出血增量。</p></div>
-              <div class="panel-card">
-                <div class="section-label">基础尺寸 (Dimension)</div>
-                <div class="dimension-grid">
-                  <div class="dim-item"><span class="dim-bg-icon">L</span><el-form-item prop="dimensions.length"><el-input-number v-model="formData.dimensions.length" :min="0" :controls="false" placeholder="0.00" /><span class="unit">cm</span></el-form-item><span class="dim-name">长度 Length</span></div>
-                  <div class="dim-separator">×</div>
-                  <div class="dim-item"><span class="dim-bg-icon">W</span><el-form-item prop="dimensions.width"><el-input-number v-model="formData.dimensions.width" :min="0" :controls="false" placeholder="0.00" /><span class="unit">cm</span></el-form-item><span class="dim-name">宽度 Width</span></div>
-                  <div class="dim-separator">×</div>
-                  <div class="dim-item"><span class="dim-bg-icon">H</span><el-form-item prop="dimensions.height"><el-input-number v-model="formData.dimensions.height" :min="0" :controls="false" placeholder="0.00" /><span class="unit">cm</span></el-form-item><span class="dim-name">高度 Height</span></div>
+            <div v-if="activeStep === 0" key="step1" class="step-panel step-dimensions">
+              <div class="panel-header">
+                <h2>定义包装规格</h2>
+                <p>设定包装盒的物理切割尺寸与印刷工艺参数。</p>
+              </div>
+
+              <div class="dimensions-stage">
+                <div class="physical-zone">
+                  <div class="box-visual">
+                    <div class="cube-wrapper">
+                      <div class="cube">
+                        <div class="face front"></div>
+                        <div class="face back"></div>
+                        <div class="face right"></div>
+                        <div class="face left"></div>
+                        <div class="face top"></div>
+                        <div class="face bottom"></div>
+                      </div>
+                      <div class="shadow"></div>
+                    </div>
+                    <div class="visual-label">3D Preview</div>
+                  </div>
+
+                  <div class="main-inputs">
+                    <div class="input-card l-axis">
+                      <div class="label-row"><el-icon><DArrowRight /></el-icon> <span class="cn">长度</span>Length</div>
+                      <div class="input-wrapper">
+                        <el-input-number v-model="formData.dimensions.length" :min="0" :controls="false" class="big-num-input" placeholder="0.0" />
+                        <span class="unit-tag">cm</span>
+                      </div>
+                    </div>
+                    <div class="input-card w-axis">
+                      <div class="label-row"><el-icon><DArrowLeft /></el-icon> <span class="cn">宽度</span> Width</div>
+                      <div class="input-wrapper">
+                        <el-input-number v-model="formData.dimensions.width" :min="0" :controls="false" class="big-num-input" placeholder="0.0" />
+                        <span class="unit-tag">cm</span>
+                      </div>
+                    </div>
+                    <div class="input-card h-axis">
+                      <div class="label-row"><el-icon><Top /></el-icon><span class="cn">高度</span>  Height</div>
+                      <div class="input-wrapper">
+                        <el-input-number v-model="formData.dimensions.height" :min="0" :controls="false" class="big-num-input" placeholder="0.0" />
+                        <span class="unit-tag">cm</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <el-divider class="custom-divider" />
-                <div class="section-label">印刷工艺 (Bleed & Safety)</div>
-                <div class="dimension-grid bleed-theme">
-                  <div class="dim-item"><span class="dim-bg-icon">X</span><el-form-item prop="dimensions.bleedX"><el-input-number v-model="formData.dimensions.bleedX" :step="0.5" :min="0" :controls="false" placeholder="3.0" /><span class="unit">mm</span></el-form-item><span class="dim-name">左右出血 Bleed X</span></div>
-                  <div class="dim-separator plus">+</div>
-                  <div class="dim-item"><span class="dim-bg-icon">Y</span><el-form-item prop="dimensions.bleedY"><el-input-number v-model="formData.dimensions.bleedY" :step="0.5" :min="0" :controls="false" placeholder="3.0" /><span class="unit">mm</span></el-form-item><span class="dim-name">上下出血 Bleed Y</span></div>
-                  <div class="dim-separator plus">+</div>
-                  <div class="dim-item"><span class="dim-bg-icon">S</span><el-form-item prop="dimensions.bleedInner"><el-input-number v-model="formData.dimensions.bleedInner" :step="0.5" :min="0" :controls="false" placeholder="3.0" /><span class="unit">mm</span></el-form-item><span class="dim-name">安全内距 Safety</span></div>
+
+                <div class="tech-dock-panel">
+
+                  <div class="dock-title-block">
+                    <div class="icon-skin"><el-icon><Scissor /></el-icon></div>
+                    <div class="text-group">
+                      <span class="cn">包装工艺参数</span>
+                      <span class="en">Process Specs</span>
+                    </div>
+                  </div>
+
+                  <div class="modules-container">
+
+                    <div class="spec-module-card">
+                      <div class="card-label">
+                        <span class="cn">左右出血</span>
+                        <span class="en">Bleed X</span>
+                      </div>
+                      <div class="card-input-row">
+                        <el-input-number
+                            v-model="formData.dimensions.bleedX"
+                            :step="0.5" :min="0" :controls="false"
+                            class="module-input"
+                        />
+                        <span class="unit">mm</span>
+                      </div>
+                    </div>
+
+                    <div class="spec-module-card">
+                      <div class="card-label">
+                        <span class="cn">上下出血</span>
+                        <span class="en">Bleed Y</span>
+                      </div>
+                      <div class="card-input-row">
+                        <el-input-number
+                            v-model="formData.dimensions.bleedY"
+                            :step="0.5" :min="0" :controls="false"
+                            class="module-input"
+                        />
+                        <span class="unit">mm</span>
+                      </div>
+                    </div>
+
+                    <div class="spec-module-card safety">
+                      <div class="card-label">
+                        <span class="cn">安全内距</span>
+                        <span class="en">Safety</span>
+                      </div>
+                      <div class="card-input-row">
+                        <el-input-number
+                            v-model="formData.dimensions.bleedInner"
+                            :step="0.5" :min="0" :controls="false"
+                            class="module-input"
+                        />
+                        <span class="unit">mm</span>
+                        <el-icon class="safety-icon"><Aim /></el-icon>
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
               </div>
             </div>
@@ -77,28 +165,13 @@
               </div>
 
               <div class="vertical-stack-container">
-
                 <el-form-item prop="marketing.brand" class="stack-item">
                   <div class="standard-input-card">
                     <div class="icon-wrapper"><el-icon><Trophy /></el-icon></div>
                     <div class="content-wrapper">
                       <label>品牌名称 Brand</label>
-                      <el-select
-                          v-model="formData.marketing.brand"
-                          placeholder="选择或输入品牌"
-                          class="seamless-input"
-                          filterable
-                          allow-create
-                          default-first-option
-                          :fit-input-width="true"
-                          @change="handleBrandChange"
-                      >
-                        <el-option
-                            v-for="item in brandOptions"
-                            :key="item.id"
-                            :label="`${item.name} - ${item.brand_category_name || '通用'}`"
-                            :value="item.name"
-                        />
+                      <el-select v-model="formData.marketing.brand" placeholder="选择或输入品牌" class="seamless-input" filterable allow-create default-first-option :fit-input-width="true" @change="handleBrandChange">
+                        <el-option v-for="item in brandOptions" :key="item.id" :label="`${item.name} - ${item.brand_category_name || '通用'}`" :value="item.name" />
                       </el-select>
                     </div>
                   </div>
@@ -114,7 +187,6 @@
                       </div>
                     </div>
                   </el-form-item>
-
                   <el-form-item class="stack-item">
                     <div class="standard-input-card">
                       <div class="icon-wrapper"><el-icon><Location /></el-icon></div>
@@ -136,7 +208,6 @@
                       </div>
                     </div>
                   </el-form-item>
-
                   <el-form-item prop="marketing.capacityValueBack" class="stack-item">
                     <div class="standard-input-card">
                       <div class="icon-wrapper"><el-icon><Document /></el-icon></div>
@@ -154,13 +225,7 @@
                       <div class="icon-wrapper"><el-icon><Ticket /></el-icon></div>
                       <div class="content-wrapper">
                         <label>商品编码 SKU</label>
-                        <el-input
-                            v-model="formData.marketing.sku"
-                            placeholder="例如：SKU00001885 ,输入编码后请按回车"
-                            class="seamless-input"
-                            @change="handleFetchBarcode"
-                        />
-
+                        <el-input v-model="formData.marketing.sku" placeholder="例如：SKU00001885 ,输入编码后请按回车" class="seamless-input" @change="handleFetchBarcode" />
                       </div>
                       <div class="status-indicator">
                         <el-tag v-if="barcodeUrl" type="success" effect="dark" round size="small">已关联条码</el-tag>
@@ -177,28 +242,10 @@
 
                 <el-form-item prop="marketing.sellingPoints" class="stack-item" style="margin-top: 10px;">
                   <div class="selling-points-board">
-                    <div class="board-header">
-                      <el-icon><StarFilled /></el-icon> <span>正面卖点文案 Selling Points</span>
-                    </div>
+                    <div class="board-header"><el-icon><StarFilled /></el-icon> <span>正面卖点文案 Selling Points</span></div>
                     <div class="tags-area">
-                      <el-tag
-                          v-for="tag in formData.marketing.sellingPoints"
-                          :key="tag"
-                          closable
-                          effect="light"
-                          class="point-tag"
-                          @close="handleCloseTag(tag)"
-                      >
-                        {{ tag }}
-                      </el-tag>
-                      <el-input
-                          v-if="formData.marketing.sellingPoints.length < 6"
-                          v-model="inputValue"
-                          class="ghost-input-tag"
-                          placeholder="+ 输入卖点回车"
-                          @keyup.enter="handleInputConfirm"
-                          @blur="handleInputConfirm"
-                      />
+                      <el-tag v-for="tag in formData.marketing.sellingPoints" :key="tag" closable effect="light" class="point-tag" @close="handleCloseTag(tag)">{{ tag }}</el-tag>
+                      <el-input v-if="formData.marketing.sellingPoints.length < 6" v-model="inputValue" class="ghost-input-tag" placeholder="+ 输入卖点回车" @keyup.enter="handleInputConfirm" @blur="handleInputConfirm" />
                     </div>
                     <div class="quick-pick-bar">
                       <span class="label">推荐:</span>
@@ -208,7 +255,6 @@
                     </div>
                   </div>
                 </el-form-item>
-
               </div>
             </div>
 
@@ -221,16 +267,21 @@
                   </el-upload>
                 </div>
                 <div v-else class="parsed-view">
-                  <div class="doc-badge"><el-icon><DocumentChecked /></el-icon><span>{{ fileName }}</span><el-button type="primary" link size="small" @click="isDocParsed = false" style="margin-left: auto">更换</el-button></div>
+                  <div class="doc-status-card">
+                    <div class="icon-box"><el-icon><Document /></el-icon></div>
+                    <div class="info-box">
+                      <div class="filename" :title="fileName">{{ fileName }}</div>
+                      <div class="status-row"><el-icon><CircleCheckFilled /></el-icon><span>AI 解析完成 (Parsed Successfully)</span></div>
+                    </div>
+                    <el-button class="change-btn" type="primary" text bg size="small" @click="isDocParsed = false">重新上传</el-button>
+                  </div>
                   <div class="data-grid">
-                    <div class="data-group full"><label>产品标准名称 (Product Name)</label><div class="data-value highlight">{{ formData.content.productName || '-' }}</div></div>
+                    <div class="data-group full"><label>产品标准名称 (Product Name)</label><div class="data-value">{{ formData.content.productName || '-' }}</div></div>
                     <div class="data-group"><label>原产国 (Origin)</label><div class="data-value">{{ formData.content.origin || '-' }}</div></div>
                     <div class="data-group"><label>保质期 (Shelf Life)</label><div class="data-value">{{ formData.content.shelfLife || '-' }}</div></div>
                     <div class="data-group"><label>制造商 (Manufacturer)</label><div class="data-value">{{ formData.content.manufacturer || '-' }}</div></div>
                     <div class="data-group"><label>地址 (Address)</label><div class="data-value">{{ formData.content.address || '-' }}</div></div>
-
                     <div class="data-group full"><label>产品功效 (Benefits)</label><div class="data-value text-block">{{ formData.content.benefits || '-' }}</div></div>
-
                     <div class="data-group full"><label>成分表 (Ingredients)</label><div class="data-value text-block">{{ formData.content.ingredients || '-' }}</div></div>
                     <div class="data-group full"><label>使用方法 (Directions)</label><div class="data-value text-block">{{ formData.content.directions || '-' }}</div></div>
                     <div class="data-group full"><label>警示语 (Warnings)</label><div class="data-value text-block">{{ formData.content.warnings || '-' }}</div></div>
@@ -257,24 +308,11 @@
             <div class="success-banner"><el-icon><Select /></el-icon></div>
             <h2>生成任务已完成！</h2>
             <p class="sub-msg">PSD 工程文件已自动下载到您的本地。</p>
-
             <div class="file-card">
               <el-icon class="file-icon"><Files /></el-icon>
-              <div class="file-info">
-                <span class="fname">{{ generatedFileName || formData.marketing.brand + '_' + formData.marketing.sku + '.psd' }}</span>
-              </div>
-              <el-button
-                  class="re-download-btn"
-                  type="primary"
-                  plain
-                  round
-                  @click="triggerDownload(currentDownloadUrl)"
-              >
-                <el-icon style="margin-right: 4px"><Download /></el-icon>
-                重新下载
-              </el-button>
+              <div class="file-info"><span class="fname">{{ generatedFileName || formData.marketing.brand + '_' + formData.marketing.sku + '.psd' }}</span></div>
+              <el-button class="re-download-btn" type="primary" plain round @click="triggerDownload(currentDownloadUrl)"><el-icon style="margin-right: 4px"><Download /></el-icon> 重新下载</el-button>
             </div>
-
             <div class="action-area">
               <el-button class="btn-lg" @click="resetWorkflow">新建项目</el-button>
               <el-button class="btn-lg" type="primary" plain @click="activeStep = 0">查看详情</el-button>
@@ -288,15 +326,7 @@
           <el-button v-if="activeStep > 0" @click="prevStep" plain round class="nav-btn">上一步</el-button>
           <div class="spacer"></div>
           <el-button v-if="activeStep < 3" type="primary" @click="nextStep" round class="nav-btn primary">下一步</el-button>
-
-          <el-button
-              v-if="activeStep === 3"
-              type="primary"
-              @click="handleGeneratePSD"
-              round
-              class="nav-btn finish-btn"
-              :disabled="isGenerating"
-          >
+          <el-button v-if="activeStep === 3" type="primary" @click="handleGeneratePSD" round class="nav-btn finish-btn" :disabled="isGenerating">
             {{ isGenerating ? '生成中...' : '生成 PSD 文件' }}
           </el-button>
         </div>
@@ -314,23 +344,25 @@
 </template>
 
 <script lang="ts" setup>
-import { DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, Select, Files, MagicStick, Download, OfficeBuilding, Location, Link, Monitor, Document, StarFilled, Picture } from '@element-plus/icons-vue'
+import {
+  DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, Select, Files,
+  MagicStick, Download, OfficeBuilding, Location, Link, Monitor, Document, StarFilled,
+  Picture,
+  // Icons
+  DArrowRight, DArrowLeft, Top, Scissor, Aim
+} from '@element-plus/icons-vue'
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 
 defineProps<{ username: string }>()
 
-// ✅ 1. 获取 emit 实例 (用于触发父组件事件)
 const emit = defineEmits(['logout'])
 
-// ✅ 2. 将 logout 回调传入 Hook
-// 这样当 usePackagingConfig 内部检测到 401 时，就会调用这个箭头函数，进而通知 App.vue 退出登录
 const {
   activeStep, formRef, formData, rules, isDocParsed, fileName, inputValue, brandOptions,
   isGenerating, progressPercentage, progressStatus, progressMessage, currentDownloadUrl, generatedFileName,
   isFetchingBarcode, barcodeUrl,
   nextStep, prevStep, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload, resetWorkflow, handleBrandChange, handleFetchBarcode
 } = usePackagingConfig(() => emit('logout'))
-
 </script>
 
 <style scoped lang="scss" src="../styles/PackagingConfig.scss"></style>

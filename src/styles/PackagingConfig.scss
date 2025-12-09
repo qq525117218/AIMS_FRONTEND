@@ -80,7 +80,6 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 /* --- 4. 主体区域 (Body) --- */
 .workflow-body {
   flex: 1;
-  /* 优化点1：增加最大宽度，从 720px -> 960px，让并排布局更舒适 */
   max-width: 960px;
   margin: 0 auto;
   width: 100%;
@@ -128,375 +127,270 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* --- 6. 步骤一：规格定义 (Step 1) --- */
-.dimension-grid {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #f1f5f9;
-  padding: 24px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  &.bleed-theme { background: #f8fafc; border: 1px dashed #cbd5e1; }
-}
-
-.dim-item {
+.dimensions-stage {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  flex: 1;
-  position: relative;
-  .dim-bg-icon { font-weight: 800; color: #cbd5e1; font-size: 24px; margin-bottom: 8px; font-family: monospace; }
-  :deep(.el-input-number) { width: 100%; max-width: 120px; }
-  :deep(.el-input__wrapper) { background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.03); border-radius: 8px; padding: 0 10px; }
-  :deep(.el-input__inner) { text-align: center; font-weight: 600; font-size: 18px; }
-  .unit { position: absolute; right: 20px; bottom: 28px; font-size: 12px; color: #94a3b8; pointer-events: none; }
-  .dim-name { margin-top: 8px; font-size: 12px; color: $text-sec; }
+  gap: 24px;
 }
 
-.dim-separator {
-  font-size: 24px; color: #cbd5e1; margin: 0 10px; padding-bottom: 20px;
-  &.plus { font-size: 20px; color: #94a3b8; }
-}
-
-.custom-divider { margin: 32px 0; border-top: 1px dashed $border-color; }
-
-/* --- 7. 步骤二：产品定义 (Step 2 - Optimized Layout) --- */
-
-.vertical-stack-container {
+/* 上部分：物理尺寸区 */
+.physical-zone {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 0 auto;
+  gap: 30px;
+  background: #fff;
+  border-radius: $radius-lg;
+  border: 1px solid $border-color;
+  padding: 30px;
+  box-shadow: $shadow-sm;
+  align-items: center;
 
-  .stack-item {
-    margin-bottom: 0;
+  @media (max-width: 768px) { flex-direction: column; }
+}
+
+.box-visual {
+  flex-shrink: 0; width: 160px; height: 160px; background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 1px dashed #cbd5e1;
+  .visual-label { margin-top: 20px; font-size: 10px; font-weight: 700; color: $text-sec; text-transform: uppercase; letter-spacing: 1px; }
+}
+
+.cube-wrapper { width: 60px; height: 60px; position: relative; perspective: 400px; transform-style: preserve-3d; }
+.cube {
+  width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: spinCube 10s infinite linear;
+  .face {
+    position: absolute; width: 60px; height: 60px; background: rgba(37, 99, 235, 0.1); border: 2px solid $primary-color; box-shadow: 0 0 10px rgba(37, 99, 235, 0.1) inset;
+    &.front  { transform: rotateY(0deg) translateZ(30px); }
+    &.back   { transform: rotateY(180deg) translateZ(30px); }
+    &.right  { transform: rotateY(90deg) translateZ(30px); }
+    &.left   { transform: rotateY(-90deg) translateZ(30px); }
+    &.top    { transform: rotateX(90deg) translateZ(30px); }
+    &.bottom { transform: rotateX(-90deg) translateZ(30px); background: rgba(37, 99, 235, 0.3); }
+  }
+}
+.shadow { width: 60px; height: 20px; background: rgba(0,0,0,0.1); border-radius: 50%; margin-top: 40px; filter: blur(5px); animation: shadowPulse 2s infinite ease-in-out; }
+
+@keyframes spinCube { 0% { transform: rotateX(-20deg) rotateY(0deg); } 100% { transform: rotateX(-20deg) rotateY(360deg); } }
+@keyframes shadowPulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 0.3; } }
+
+/* 右侧输入区 */
+.main-inputs {
+  flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%;
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+.input-card {
+  background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid transparent; transition: all 0.2s; cursor: text;
+  &:hover { background: #fff; border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  &:focus-within { background: #fff; border-color: $primary-color; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+  .label-row { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: $text-sec; margin-bottom: 8px; text-transform: uppercase; .el-icon { font-size: 14px; } }
+  &.l-axis .label-row .el-icon { color: #ef4444; }
+  &.w-axis .label-row .el-icon { color: #10b981; }
+  &.h-axis .label-row .el-icon { color: #3b82f6; }
+  .input-wrapper { display: flex; align-items: baseline; gap: 4px; }
+  .big-num-input {
     width: 100%;
+    :deep(.el-input__wrapper) { box-shadow: none !important; padding: 0; background: transparent; }
+    :deep(.el-input__inner) { font-size: 28px; font-weight: 700; color: $text-main; text-align: left; height: 36px; line-height: 36px; font-family: 'Inter', sans-serif; }
+  }
+  .unit-tag { font-size: 12px; color: #94a3b8; font-weight: 600; align-self: center; }
+}
+
+/* --- New Modular Tech Dock --- */
+.tech-dock-panel {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  border: 1px solid #fff;
+  margin-top: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.12);
+  }
+
+  @media (max-width: 800px) {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 16px;
   }
 }
 
-/* 优化点2：Grid 两列布局 */
-.grid-two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  width: 100%;
+.dock-title-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 140px;
 
-  /* 移动端自动退回单列 */
-  @media (max-width: 768px) {
+  .icon-skin {
+    width: 36px;
+    height: 36px;
+    background: #1e293b;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .text-group {
+    display: flex;
+    flex-direction: column;
+    .cn { font-size: 14px; font-weight: 700; color: $text-main; }
+    .en { font-size: 10px; color: $text-sec; text-transform: uppercase; letter-spacing: 0.5px; }
+  }
+}
+
+.modules-container {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
 }
 
-/* 统一的标准输入卡片 */
-.standard-input-card {
-  background: #fff;
-  border: 1px solid $border-color;
-  border-radius: $radius-md;
-  overflow: hidden;
-  height: 80px;
+/* 独立功能卡片 */
+.spec-module-card {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 10px 16px;
   display: flex;
-  align-items: center;
-  padding: 0 20px;
-  gap: 20px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  width: 100%; /* 确保在 Grid 中占满 */
-  box-sizing: border-box; /* 防止 padding 撑大 */
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  cursor: text;
 
-  &:hover {
-    border-color: #cbd5e1;
-    box-shadow: $shadow-sm;
+  &:hover, &:focus-within {
+    background: #fff;
+    border-color: $primary-color;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
     transform: translateY(-1px);
-    z-index: 5; /* 避免阴影被遮挡 */
   }
 
-  &:focus-within {
-    border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    background: #fff;
-    z-index: 10;
-
-    .icon-wrapper {
-      background: $primary-color;
-      color: #fff;
+  &.safety {
+    &:hover, &:focus-within {
+      border-color: $success-color;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);
+      .safety-icon { color: $success-color; transform: scale(1.1); }
     }
   }
 
-  .icon-wrapper {
-    width: 44px;
-    height: 44px;
-    background: $primary-light;
-    border-radius: 12px;
+  .card-label {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    .cn { font-size: 12px; font-weight: 700; color: $text-main; }
+    .en { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; }
+  }
+
+  .card-input-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    color: $primary-color;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-  }
+    gap: 4px;
 
-  .content-wrapper {
-    flex: 1;
-    min-width: 0; /* 关键：防止 flex 子项溢出 */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
-
-    label {
-      font-size: 11px;
-      font-weight: 700;
-      color: $text-sec;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-      line-height: 1;
+    .module-input {
+      width: 100%;
+      :deep(.el-input__wrapper) { box-shadow: none !important; padding: 0; background: transparent; }
+      :deep(.el-input__inner) {
+        font-family: 'Inter', sans-serif;
+        text-align: left;
+        font-weight: 700;
+        font-size: 20px;
+        color: $text-main;
+        height: 28px;
+        line-height: 28px;
+        padding: 0;
+      }
     }
 
-    /* 优化点3：无缝输入框 & 下拉框修复 */
+    .unit { font-size: 11px; font-weight: 600; color: #94a3b8; margin-top: 4px; }
+
+    .safety-icon {
+      margin-left: auto;
+      color: #cbd5e1;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+  }
+}
+
+/* --- 7. 步骤二：产品定义 --- */
+.vertical-stack-container { display: flex; flex-direction: column; gap: 16px; margin: 0 auto; .stack-item { margin-bottom: 0; width: 100%; } }
+.grid-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; @media (max-width: 768px) { grid-template-columns: 1fr; } }
+.standard-input-card {
+  background: #fff; border: 1px solid $border-color; border-radius: $radius-md; overflow: hidden; height: 80px; display: flex; align-items: center; padding: 0 20px; gap: 20px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; width: 100%; box-sizing: border-box;
+  &:hover { border-color: #cbd5e1; box-shadow: $shadow-sm; transform: translateY(-1px); z-index: 5; }
+  &:focus-within { border-color: $primary-color; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background: #fff; z-index: 10; .icon-wrapper { background: $primary-color; color: #fff; } }
+  .icon-wrapper { width: 44px; height: 44px; background: $primary-light; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: $primary-color; flex-shrink: 0; transition: all 0.3s ease; }
+  .content-wrapper {
+    flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; height: 100%;
+    label { font-size: 11px; font-weight: 700; color: $text-sec; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; line-height: 1; }
     .seamless-input {
       width: 100%;
-
-      /* 针对 el-input 和 el-select 的通用样式重置 */
-      :deep(.el-input__wrapper),
-      :deep(.el-select__wrapper) {
-        box-shadow: none !important;
-        padding: 0 !important;
-        background: transparent;
-        min-height: 30px;
-        line-height: 30px;
-      }
-
-      :deep(.el-input__inner) {
-        font-size: 17px;
-        font-weight: 600;
-        color: $text-main;
-        height: 30px;
-        line-height: 30px;
-        padding: 0;
-        font-family: 'Inter', sans-serif;
-
-        &::placeholder {
-          font-weight: 400;
-          color: #cbd5e1;
-        }
-      }
-
-      /* 针对 el-select 的特殊修复 */
+      :deep(.el-input__wrapper), :deep(.el-select__wrapper) { box-shadow: none !important; padding: 0 !important; background: transparent; min-height: 30px; line-height: 30px; }
+      :deep(.el-input__inner) { font-size: 17px; font-weight: 600; color: $text-main; height: 30px; line-height: 30px; padding: 0; font-family: 'Inter', sans-serif; &::placeholder { font-weight: 400; color: #cbd5e1; } }
       &.el-select {
-        :deep(.el-select__selected-item) {
-          padding: 0 !important;
-          color: $text-main;
-          font-weight: 600;
-          font-size: 17px;
-          line-height: 30px;
-        }
-        :deep(.el-select__placeholder) {
-          padding: 0 !important;
-          font-weight: 400;
-          color: #cbd5e1;
-          font-size: 17px;
-        }
-        /* 隐藏掉不需要的边框，但保留箭头指示 */
-        :deep(.el-select__suffix) {
-          opacity: 0.5;
-        }
+        :deep(.el-select__selected-item) { padding: 0 !important; color: $text-main; font-weight: 600; font-size: 17px; line-height: 30px; }
+        :deep(.el-select__placeholder) { padding: 0 !important; font-weight: 400; color: #cbd5e1; font-size: 17px; }
+        :deep(.el-select__suffix) { opacity: 0.5; }
       }
     }
   }
 }
-
-/* 特殊：带抽屉的卡片 (SKU) */
 .standard-input-card.has-drawer {
-  height: auto;
-  min-height: 80px;
-  flex-direction: column;
-  padding: 0;
-  align-items: stretch;
-  gap: 0;
-
-  .main-row {
-    height: 80px;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    gap: 20px;
-  }
-
-  .status-indicator {
-    margin-left: auto;
-  }
-
-  .bottom-drawer {
-    background: $bg-color;
-    border-top: 1px solid $border-color;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    animation: slideDown 0.2s ease-out;
-
-    .file-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: $text-main;
-      font-weight: 500;
-      .el-icon { color: $primary-color; }
-    }
-  }
+  height: auto; min-height: 80px; flex-direction: column; padding: 0; align-items: stretch; gap: 0;
+  .main-row { height: 80px; display: flex; align-items: center; padding: 0 20px; gap: 20px; }
+  .status-indicator { margin-left: auto; }
+  .bottom-drawer { background: $bg-color; border-top: 1px solid $border-color; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; animation: slideDown 0.2s ease-out; .file-info { display: flex; align-items: center; gap: 8px; font-size: 13px; color: $text-main; font-weight: 500; .el-icon { color: $primary-color; } } }
 }
-
-/* 卖点面板 (Selling Points) */
 .selling-points-board {
-  background: #fff;
-  border: 1px solid $border-color;
-  border-radius: $radius-lg;
-  padding: 24px;
-  transition: all 0.2s;
-
+  background: #fff; border: 1px solid $border-color; border-radius: $radius-lg; padding: 24px; transition: all 0.2s;
   &:hover { border-color: #cbd5e1; }
   &:focus-within { border-color: $primary-color; box-shadow: $shadow-sm; }
-
-  .board-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: $text-sec;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    .el-icon { color: $warning-color; font-size: 16px; }
-  }
-
+  .board-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: $text-sec; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; .el-icon { color: $warning-color; font-size: 16px; } }
   .tags-area {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-    min-height: 40px;
-
-    .point-tag {
-      height: 36px;
-      padding: 0 14px;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      color: $text-main;
-      border-radius: 8px;
-      font-size: 14px;
-      :deep(.el-tag__close) { color: $text-sec; }
-      :deep(.el-tag__close:hover) { background-color: #ef4444; color: white; }
-    }
-
-    .ghost-input-tag {
-      width: 160px;
-      :deep(.el-input__wrapper) { box-shadow: none; background: transparent; padding: 0; }
-      :deep(.el-input__inner) { font-size: 14px; }
-    }
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; min-height: 40px;
+    .point-tag { height: 36px; padding: 0 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: $text-main; border-radius: 8px; font-size: 14px; :deep(.el-tag__close) { color: $text-sec; } :deep(.el-tag__close:hover) { background-color: #ef4444; color: white; } }
+    .ghost-input-tag { width: 160px; :deep(.el-input__wrapper) { box-shadow: none; background: transparent; padding: 0; } :deep(.el-input__inner) { font-size: 14px; } }
   }
-
   .quick-pick-bar {
-    border-top: 1px dashed $border-color;
-    padding-top: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
+    border-top: 1px dashed $border-color; padding-top: 16px; display: flex; align-items: center; gap: 12px;
     .label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
-    .chip {
-      font-size: 12px;
-      padding: 6px 12px;
-      background: #f1f5f9;
-      border-radius: 100px;
-      color: $text-sec;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.2s;
-
-      &:hover { background: $primary-light; color: $primary-color; border-color: #bfdbfe; }
-    }
+    .chip { font-size: 12px; padding: 6px 12px; background: #f1f5f9; border-radius: 100px; color: $text-sec; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; &:hover { background: $primary-light; color: $primary-color; border-color: #bfdbfe; } }
   }
 }
-
 /* --- 8. 步骤三：文案解析 (Step 3) --- */
-.hero-upload {
-  :deep(.el-upload-dragger) {
-    width: 100%; height: 200px; border: 2px dashed $border-color; border-radius: 12px;
-    background: #f8fafc; transition: all 0.3s; display: flex; align-items: center; justify-content: center;
-    &:hover { border-color: $primary-color; background: #eff6ff; }
-  }
-}
-.upload-content {
-  .icon-circle { width: 50px; height: 50px; background: white; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); color: $primary-color; font-size: 24px; }
-  h3 { margin: 0; font-size: 16px; font-weight: 600; color: $text-main; }
-  p { margin: 8px 0 0; font-size: 13px; color: $text-sec; }
-}
+.hero-upload { :deep(.el-upload-dragger) { width: 100%; height: 200px; border: 2px dashed $border-color; border-radius: 12px; background: #f8fafc; transition: all 0.3s; display: flex; align-items: center; justify-content: center; &:hover { border-color: $primary-color; background: #eff6ff; } } }
+.upload-content { .icon-circle { width: 50px; height: 50px; background: white; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); color: $primary-color; font-size: 24px; } h3 { margin: 0; font-size: 16px; font-weight: 600; color: $text-main; } p { margin: 8px 0 0; font-size: 13px; color: $text-sec; } }
 .parsed-view {
-  .doc-badge { background: #ecfdf5; color: #059669; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: 600; margin-bottom: 24px; border: 1px solid #a7f3d0; }
-  .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-    .data-group {
-      &.full { grid-column: span 2; }
-      label { display: block; font-size: 12px; color: $text-sec; margin-bottom: 6px; }
-      .data-value { padding: 10px 12px; background: #f8fafc; border-radius: 6px; font-size: 14px; color: $text-main; border: 1px solid #f1f5f9; min-height: 42px;
-        &.highlight { font-weight: 600; color: $primary-color; background: #eff6ff; border-color: #dbeafe; }
-        &.text-block { min-height: 60px; line-height: 1.5; font-size: 13px; }
-        &.warning { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
-      }
-    }
+  .doc-status-card {
+    background: #ffffff; border: 1px solid $border-color; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; position: relative; overflow: hidden; box-shadow: $shadow-sm; transition: all 0.2s ease;
+    &::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: $success-color; }
+    &:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-color: #cbd5e1; }
+    .icon-box { width: 42px; height: 42px; border-radius: 10px; background: rgba($success-color, 0.1); color: $success-color; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .info-box { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 4px; .filename { font-weight: 600; font-size: 14px; color: $text-main; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; } .status-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: $success-color; font-weight: 500; .el-icon { font-size: 13px; } } }
+    .change-btn { flex-shrink: 0; font-weight: 600; &:hover { color: $primary-color; background-color: $primary-light; } }
   }
+  .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; .data-group { &.full { grid-column: span 2; } label { display: block; font-size: 12px; color: $text-sec; margin-bottom: 6px; } .data-value { padding: 10px 12px; background: #f8fafc; border-radius: 6px; font-size: 14px; color: $text-main; border: 1px solid #f1f5f9; min-height: 42px; &.highlight { font-weight: 600; color: $primary-color; background: #eff6ff; border-color: #dbeafe; } &.text-block { min-height: 60px; line-height: 1.5; font-size: 13px; } &.warning { color: #b91c1c; background: #fef2f2; border-color: #fecaca; } } } }
 }
-
 /* --- 9. 步骤四：准备生成 (Step 4) --- */
 .centered-panel { text-align: center; .panel-card { border: none; box-shadow: none; background: transparent; } }
-.success-visual { position: relative; width: 80px; height: 80px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;
-  .success-icon { font-size: 64px; color: $success-color; position: relative; z-index: 2; }
-  .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba($success-color, 0.2); animation: pulse 2s infinite; }
-}
-.summary-box { background: white; border-radius: 12px; padding: 24px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: inline-flex; gap: 40px; text-align: left;
-  .summary-item { display: flex; flex-direction: column; span { font-size: 12px; color: $text-sec; margin-bottom: 4px; } strong { font-size: 16px; color: $text-main; } }
-}
-
+.success-visual { position: relative; width: 80px; height: 80px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; .success-icon { font-size: 64px; color: $success-color; position: relative; z-index: 2; } .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba($success-color, 0.2); animation: pulse 2s infinite; } }
+.summary-box { background: white; border-radius: 12px; padding: 24px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: inline-flex; gap: 40px; text-align: left; .summary-item { display: flex; flex-direction: column; span { font-size: 12px; color: $text-sec; margin-bottom: 4px; } strong { font-size: 16px; color: $text-main; } } }
 /* --- 10. 步骤五：完成页 (Success Page) --- */
-.success-page {
-  text-align: center; padding: 40px 20px; animation: slideUp 0.5s ease-out;
-  .success-banner { width: 120px; height: 120px; background: #ecfdf5; border-radius: 50%; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center; color: $success-color; font-size: 60px; box-shadow: 0 10px 30px -10px rgba($success-color, 0.3); }
-  h2 { font-size: 32px; color: $text-main; margin: 0 0 10px 0; font-weight: 800; letter-spacing: -1px; }
-  .sub-msg { font-size: 16px; color: $text-sec; margin-bottom: 40px; }
-  .file-card { background: white; border: 1px solid $border-color; border-radius: 20px; padding: 24px; max-width: 650px; width: 100%; margin: 0 auto 40px; display: flex; align-items: center; gap: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    &:hover { transform: translateY(-4px); box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.1); border-color: $primary-color; }
-    .file-icon { font-size: 36px; color: $primary-color; background: #eff6ff; width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .file-info { text-align: left; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; padding-top: 0;
-      .fname { display: block; font-weight: 700; color: $text-main; margin-bottom: 0; font-size: 15px; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    }
-    .re-download-btn { align-self: center; flex-shrink: 0; }
-  }
-  .action-area { display: flex; justify-content: center; gap: 20px; .btn-lg { width: 160px; height: 48px; font-size: 15px; font-weight: 600; border-radius: 10px; } }
-}
-
+.success-page { text-align: center; padding: 40px 20px; animation: slideUp 0.5s ease-out; .success-banner { width: 120px; height: 120px; background: #ecfdf5; border-radius: 50%; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center; color: $success-color; font-size: 60px; box-shadow: 0 10px 30px -10px rgba($success-color, 0.3); } h2 { font-size: 32px; color: $text-main; margin: 0 0 10px 0; font-weight: 800; letter-spacing: -1px; } .sub-msg { font-size: 16px; color: $text-sec; margin-bottom: 40px; } .file-card { background: white; border: 1px solid $border-color; border-radius: 20px; padding: 24px; max-width: 650px; width: 100%; margin: 0 auto 40px; display: flex; align-items: center; gap: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); &:hover { transform: translateY(-4px); box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.1); border-color: $primary-color; } .file-icon { font-size: 36px; color: $primary-color; background: #eff6ff; width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; } .file-info { text-align: left; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; padding-top: 0; .fname { display: block; font-weight: 700; color: $text-main; margin-bottom: 0; font-size: 15px; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } } .re-download-btn { align-self: center; flex-shrink: 0; } } .action-area { display: flex; justify-content: center; gap: 20px; .btn-lg { width: 160px; height: 48px; font-size: 15px; font-weight: 600; border-radius: 10px; } } }
 /* --- 11. 进度弹窗 --- */
-.design-gen-dialog {
-  border-radius: 24px !important; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-  :deep(.el-dialog__header) { margin: 0; padding: 0; border-bottom: 1px solid $border-color; }
-  :deep(.el-dialog__body) { padding: 0; }
-}
-.dialog-header-custom { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 20px; background: #f8fafc; .icon-pulse { color: $primary-color; font-size: 20px; animation: spin 3s linear infinite; } .header-title { font-size: 16px; font-weight: 700; color: $text-main; letter-spacing: 0.5px; } }
-.progress-dialog-content {
-  padding: 40px 30px; display: flex; flex-direction: column; align-items: center; text-align: center;
-  .progress-ring-wrapper { position: relative; margin-bottom: 24px; .ring-inner-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: baseline; justify-content: center; .number { font-size: 36px; font-weight: 800; color: $text-main; line-height: 1; letter-spacing: -1px; } .symbol { font-size: 14px; font-weight: 600; color: $text-sec; margin-left: 2px; } } }
-  .status-box { .status-main { font-size: 18px; font-weight: 700; color: $text-main; margin: 0 0 6px 0; } .status-sub { font-size: 13px; color: $text-sec; margin: 0; } }
-}
-
+.design-gen-dialog { border-radius: 24px !important; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important; :deep(.el-dialog__header) { margin: 0; padding: 0; border-bottom: 1px solid $border-color; } :deep(.el-dialog__body) { padding: 0; } } .dialog-header-custom { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 20px; background: #f8fafc; .icon-pulse { color: $primary-color; font-size: 20px; animation: spin 3s linear infinite; } .header-title { font-size: 16px; font-weight: 700; color: $text-main; letter-spacing: 0.5px; } } .progress-dialog-content { padding: 40px 30px; display: flex; flex-direction: column; align-items: center; text-align: center; .progress-ring-wrapper { position: relative; margin-bottom: 24px; .ring-inner-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: baseline; justify-content: center; .number { font-size: 36px; font-weight: 800; color: $text-main; line-height: 1; letter-spacing: -1px; } .symbol { font-size: 14px; font-weight: 600; color: $text-sec; margin-left: 2px; } } } .status-box { .status-main { font-size: 18px; font-weight: 700; color: $text-main; margin: 0 0 6px 0; } .status-sub { font-size: 13px; color: $text-sec; margin: 0; } } }
 /* --- 12. 底部导航栏 --- */
-.workflow-footer {
-  position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid $border-color; padding: 16px 0; z-index: 100;
-  .footer-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; padding: 0 20px; align-items: center; }
-  .nav-btn { min-width: 120px; height: 44px; font-weight: 600; &.primary { box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); } &.finish-btn { background: $success-color; border-color: $success-color; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); } }
-}
-
+.workflow-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid $border-color; padding: 16px 0; z-index: 100; .footer-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; padding: 0 20px; align-items: center; } .nav-btn { min-width: 120px; height: 44px; font-weight: 600; &.primary { box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); } &.finish-btn { background: $success-color; border-color: $success-color; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); } } }
 /* --- 13. 动画 --- */
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
