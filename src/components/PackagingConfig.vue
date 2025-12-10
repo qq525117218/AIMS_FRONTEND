@@ -27,14 +27,15 @@
 
     <div class="workflow-body">
       <div class="steps-container">
-        <el-steps :active="activeStep" finish-status="success" align-center class="custom-steps">
-          <el-step title="定义规格" icon="Box" />
-          <el-step title="产品定义" icon="PriceTag" />
-          <el-step title="文案解析" icon="DocumentChecked" />
-          <el-step title="构建交付" icon="Files" />
-        </el-steps>
+        <div class="glass-steps-panel">
+          <el-steps :active="activeStep" finish-status="success" align-center class="premium-steps">
+            <el-step title="规格定义" description="Dimensions" icon="Box" />
+            <el-step title="产品定义" description="Identity" icon="PriceTag" />
+            <el-step title="文案解析" description="Analysis" icon="DocumentChecked" />
+            <el-step title="构建交付" description="Delivery" icon="Files" />
+          </el-steps>
+        </div>
       </div>
-
       <div class="workspace-container">
         <el-form
             v-if="activeStep < 4"
@@ -359,7 +360,7 @@ import { computed } from 'vue'
 import {
   DocumentAdd, Trophy, Ticket, CircleCheckFilled, Select, Files,
   MagicStick, Download, OfficeBuilding, Location, Link, Monitor, Document, StarFilled,
-  Picture, DArrowRight, DArrowLeft, Top, Scissor, Aim
+  Picture, DArrowRight, DArrowLeft, Top, Scissor,
 } from '@element-plus/icons-vue'
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 

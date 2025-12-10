@@ -89,18 +89,121 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   gap: 30px;
 }
 
+/* --- ✨✨✨ 步骤条：大师级重构 (Premium Steps) ✨✨✨ */
 .steps-container {
-  margin-bottom: 20px;
-
-  :deep(.el-step__title) { font-size: 13px; font-weight: 500; }
-  :deep(.el-step__head.is-success) { color: $primary-color; border-color: $primary-color; }
-  :deep(.el-step__title.is-success) { color: $text-main; }
-  :deep(.el-step__head.is-process) {
-    color: $primary-color; border-color: $primary-color;
-    .el-step__icon { background-color: #eff6ff; transform: scale(1.15); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); transition: all 0.3s ease; font-weight: bold; }
-  }
-  :deep(.el-step__title.is-process) { color: $primary-color; font-weight: 700; transform: scale(1.05); transition: all 0.3s ease; }
+  margin-bottom: 24px;
+  padding: 0 20px;
 }
+
+.glass-steps-panel {
+  /* 磨砂玻璃基座，通透感 */
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
+  padding: 24px 32px;
+  box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.02),
+          0 10px 15px -3px rgba(0, 0, 0, 0.02);
+
+  @media (max-width: 768px) { padding: 20px 10px; }
+}
+
+.premium-steps {
+  /* 1. 连接线优化 */
+  :deep(.el-step__line) {
+    height: 2px; /* 极细精致 */
+    top: 22px !important; /* 精确对齐 Squircle 中心 */
+    background-color: #f1f5f9; /* 极淡的灰，隐形连接 */
+
+    .el-step__line-inner {
+      border-color: $primary-color !important;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  /* 2. 图标容器形态革新：从圆形变为 Squircle (方圆形) */
+  :deep(.el-step__head) {
+    .el-step__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px; /* Squircle 核心 */
+      border: none; /* 去除边框，使用色块 */
+      background: #f1f5f9; /* 默认：浅灰底色 (Neumorphic 凹槽感) */
+      color: #94a3b8;
+      font-size: 18px;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 10;
+      /* 这里的 box-shadow 负责切断连接线 */
+      box-shadow: 0 0 0 6px rgba(255,255,255,0.8);
+    }
+
+    /* 等待状态：低调 */
+    &.is-wait {
+      color: #cbd5e1;
+      border-color: transparent;
+    }
+  }
+
+  /* 3. 进行中状态 (Process)：流光溢彩 */
+  :deep(.el-step__head.is-process) {
+    .el-step__icon {
+      /* 渐变主色 */
+      background: linear-gradient(135deg, $primary-color 0%, #3b82f6 100%);
+      color: #fff;
+      transform: scale(1.15) translateY(-2px); /* 悬浮效果 */
+      /* 扩散阴影，制造发光感 */
+      box-shadow:
+              0 8px 20px -6px rgba(37, 99, 235, 0.5),
+              0 0 0 5px rgba(255,255,255,1);
+    }
+  }
+
+  /* 4. 完成状态 (Success)：清透 */
+  :deep(.el-step__head.is-success) {
+    border-color: transparent;
+    .el-step__icon {
+      background: #dbeafe; /* 极浅的蓝 */
+      color: $primary-color;
+      font-weight: bold;
+      box-shadow: 0 0 0 5px rgba(255,255,255,1);
+    }
+    .el-step__line { background-color: #bfdbfe; } /* 完成的路段稍微深一点 */
+  }
+
+  /* 5. 文字排版 */
+  :deep(.el-step__main) {
+    margin-top: 10px;
+  }
+
+  :deep(.el-step__title) {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    line-height: 1.4;
+
+    &.is-process {
+      color: $text-main;
+      font-weight: 800;
+    }
+    &.is-success {
+      color: $text-main;
+    }
+  }
+
+  :deep(.el-step__description) {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px; /* 增加字间距，提升高级感 */
+    margin-top: 4px;
+    font-family: 'Inter', sans-serif;
+    color: #cbd5e1;
+
+    &.is-process { color: $primary-color; }
+  }
+}
+/* --- ✨✨✨ 结束 ✨✨✨ */
 
 .panel-header {
   text-align: center;
