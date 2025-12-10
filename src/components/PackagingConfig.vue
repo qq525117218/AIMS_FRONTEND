@@ -345,11 +345,9 @@
 
 <script lang="ts" setup>
 import {
-  DocumentAdd, DocumentChecked, Trophy, Ticket, CircleCheckFilled, Select, Files,
+  DocumentAdd, Trophy, Ticket, CircleCheckFilled, Select, Files,
   MagicStick, Download, OfficeBuilding, Location, Link, Monitor, Document, StarFilled,
-  Picture,
-  // Icons
-  DArrowRight, DArrowLeft, Top, Scissor, Aim
+  Picture, DArrowRight, DArrowLeft, Top, Scissor, Aim
 } from '@element-plus/icons-vue'
 import { usePackagingConfig } from '../logic/usePackagingConfig'
 
