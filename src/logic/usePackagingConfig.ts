@@ -164,7 +164,7 @@ export function usePackagingConfig(onUnauthorized: () => void) {
             benefits: '' // [新增] 初始化
         },
         marketing: {
-            sku: 'SKU00001885',
+            sku: '',
             brand: 'WestMoon',
             capacityValue: 'NET：100G/3.53 FL.OZ',
             capacityValueBack: 'NET：100G/3.53 FL.OZ',
