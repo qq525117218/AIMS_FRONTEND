@@ -118,7 +118,7 @@
                             :step="0.5" :min="0" :controls="false"
                             class="module-input"
                         />
-                        <span class="unit">mm</span>
+                        <span class="unit">cm</span>
                       </div>
                     </div>
 
@@ -133,7 +133,7 @@
                             :step="0.5" :min="0" :controls="false"
                             class="module-input"
                         />
-                        <span class="unit">mm</span>
+                        <span class="unit">cm</span>
                       </div>
                     </div>
 
@@ -148,8 +148,7 @@
                             :step="0.5" :min="0" :controls="false"
                             class="module-input"
                         />
-                        <span class="unit">mm</span>
-                        <el-icon class="safety-icon"><Aim /></el-icon>
+                        <span class="unit">cm</span>
                       </div>
                     </div>
 
