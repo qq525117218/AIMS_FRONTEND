@@ -60,12 +60,24 @@
 
                     <div class="cube-wrapper" :style="cubeStyle">
                       <div class="cube">
-                        <div class="face front"><span>FRONT</span></div>
-                        <div class="face back"><span>BACK</span></div>
-                        <div class="face right"><span>RIGHT</span></div>
-                        <div class="face left"><span>LEFT</span></div>
-                        <div class="face top"><span>TOP</span></div>
-                        <div class="face bottom"><span>BOTTOM</span></div>
+                        <div class="face front">
+                          <div class="face-label"><span class="en">FRONT</span><span class="cn">正面</span></div>
+                        </div>
+                        <div class="face back">
+                          <div class="face-label"><span class="en">BACK</span><span class="cn">背面</span></div>
+                        </div>
+                        <div class="face right">
+                          <div class="face-label"><span class="en">RIGHT</span><span class="cn">右侧面</span></div>
+                        </div>
+                        <div class="face left">
+                          <div class="face-label"><span class="en">LEFT</span><span class="cn">左侧面</span></div>
+                        </div>
+                        <div class="face top">
+                          <div class="face-label"><span class="en">TOP</span><span class="cn">顶面</span></div>
+                        </div>
+                        <div class="face bottom">
+                          <div class="face-label"><span class="en">BOTTOM</span><span class="cn">底面</span></div>
+                        </div>
 
                         <div class="inner-core"></div>
                       </div>

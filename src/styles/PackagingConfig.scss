@@ -147,7 +147,7 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   @media (max-width: 768px) { flex-direction: column; }
 }
 
-/* --- ✨✨✨ 3D Preview (工程蓝图版 - 修复版) ✨✨✨ */
+/* --- ✨✨✨ 3D Preview (工程蓝图版 - 中英对照) ✨✨✨ */
 .box-visual {
   flex-shrink: 0;
   width: 220px;
@@ -207,13 +207,9 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     align-items: center;
     justify-content: center;
 
-    /* 文字样式 */
+    /* 基本文字设置 */
     font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    font-weight: 800;
     color: #1e40af; /* 深蓝色文字 */
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     user-select: none;
     backface-visibility: visible;
 
@@ -221,42 +217,60 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
     transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
+    /* ✨ 新增：标签布局 ✨ */
+    .face-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      line-height: 1;
 
+      .en {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .cn {
+        font-size: 8px;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+    }
+
+    /* --- 面定位 --- */
     &.front {
       width: var(--box-l); height: var(--box-h);
-      /* 前面 */
       transform: translate(-50%, -50%) translateZ(#{calc(var(--box-w) * 0.5)});
       background: rgba(59, 130, 246, 0.2);
     }
     &.back {
       width: var(--box-l); height: var(--box-h);
-      /* 后面 */
       transform: translate(-50%, -50%) rotateY(180deg) translateZ(#{calc(var(--box-w) * 0.5)});
-      span { transform: scaleX(-1); }
+      /* 修复文字镜像: 对容器进行翻转 */
+      .face-label { transform: scaleX(-1); }
       background: rgba(59, 130, 246, 0.15);
     }
     &.right {
       width: var(--box-w); height: var(--box-h);
-      /* 右面 */
       transform: translate(-50%, -50%) rotateY(90deg) translateZ(#{calc(var(--box-l) * 0.5)});
       background: rgba(59, 130, 246, 0.12);
     }
     &.left {
       width: var(--box-w); height: var(--box-h);
-      /* 左面 */
       transform: translate(-50%, -50%) rotateY(-90deg) translateZ(#{calc(var(--box-l) * 0.5)});
       background: rgba(59, 130, 246, 0.12);
     }
     &.top {
       width: var(--box-l); height: var(--box-w);
-      /* 顶面 */
       transform: translate(-50%, -50%) rotateX(90deg) translateZ(#{calc(var(--box-h) * 0.5)});
       background: rgba(59, 130, 246, 0.05);
       border-color: rgba(37, 99, 235, 0.4);
     }
     &.bottom {
       width: var(--box-l); height: var(--box-w);
-      /* 底面 */
       transform: translate(-50%, -50%) rotateX(-90deg) translateZ(#{calc(var(--box-h) * 0.5)});
       background: rgba(30, 41, 59, 0.1);
       border: none;
@@ -282,7 +296,6 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   width: var(--box-l);
   height: var(--box-w);
   background: radial-gradient(rgba(15, 23, 42, 0.2), transparent 70%);
-  /* 阴影位置也加上插值 */
   transform: translate(-50%, -50%) translateY(#{calc(var(--box-h) * 0.5 + 25px)}) rotateX(90deg);
   filter: blur(8px);
   animation: shadow-breathe 6s ease-in-out infinite;
@@ -298,7 +311,6 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   50% { margin-top: -10px; }
 }
 @keyframes shadow-breathe {
-  /* 关键帧中的计算也需要插值 */
   0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) translateY(#{calc(var(--box-h) * 0.5 + 25px)}) rotateX(90deg) scale(1); }
   50% { opacity: 0.3; transform: translate(-50%, -50%) translateY(#{calc(var(--box-h) * 0.5 + 35px)}) rotateX(90deg) scale(0.8); }
 }
