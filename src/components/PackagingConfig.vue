@@ -56,20 +56,22 @@
               <div class="dimensions-stage">
                 <div class="physical-zone">
                   <div class="box-visual">
-                    <div class="cube-wrapper">
-                      <div class="cube">
-                        <div class="face front"></div>
-                        <div class="face back"></div>
-                        <div class="face right"></div>
-                        <div class="face left"></div>
-                        <div class="face top"></div>
-                        <div class="face bottom"></div>
-                      </div>
-                      <div class="shadow"></div>
-                    </div>
-                    <div class="visual-label">3D Preview</div>
-                  </div>
+                    <div class="grid-bg"></div>
 
+                    <div class="cube-wrapper" :style="cubeStyle">
+                      <div class="cube">
+                        <div class="face front"><span>FRONT</span></div>
+                        <div class="face back"><span>BACK</span></div>
+                        <div class="face right"><span>RIGHT</span></div>
+                        <div class="face left"><span>LEFT</span></div>
+                        <div class="face top"><span>TOP</span></div>
+                        <div class="face bottom"><span>BOTTOM</span></div>
+
+                        <div class="inner-core"></div>
+                      </div>
+                      <div class="shadow-dynamic"></div>
+                    </div>
+                  </div>
                   <div class="main-inputs">
                     <div class="input-card l-axis">
                       <div class="label-row"><el-icon><DArrowRight /></el-icon> <span class="cn">长度</span>Length</div>
@@ -96,7 +98,6 @@
                 </div>
 
                 <div class="tech-dock-panel">
-
                   <div class="dock-title-block">
                     <div class="icon-skin"><el-icon><Scissor /></el-icon></div>
                     <div class="text-group">
@@ -106,7 +107,6 @@
                   </div>
 
                   <div class="modules-container">
-
                     <div class="spec-module-card">
                       <div class="card-label">
                         <span class="cn">左右出血</span>
@@ -344,6 +344,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import {
   DocumentAdd, Trophy, Ticket, CircleCheckFilled, Select, Files,
   MagicStick, Download, OfficeBuilding, Location, Link, Monitor, Document, StarFilled,
@@ -361,6 +362,26 @@ const {
   isFetchingBarcode, barcodeUrl,
   nextStep, prevStep, handleFileUpload, handleCloseTag, handleInputConfirm, addQuickTag, handleGeneratePSD, triggerDownload, resetWorkflow, handleBrandChange, handleFetchBarcode
 } = usePackagingConfig(() => emit('logout'))
+
+// ✨ 动态计算 3D 样式
+const cubeStyle = computed(() => {
+  const { length, width, height } = formData.dimensions
+
+  const l = Math.max(length, 0.1)
+  const w = Math.max(width, 0.1)
+  const h = Math.max(height, 0.1)
+
+  // 自动缩放: 基准稍微大一点 140px，看起来更饱满
+  const maxSide = Math.max(l, w, h)
+  const baseSize = 140
+  const scale = baseSize / maxSide
+
+  return {
+    '--box-l': `${l * scale}px`, // 长 (X)
+    '--box-w': `${w * scale}px`, // 宽 (Z - 深度)
+    '--box-h': `${h * scale}px`  // 高 (Y)
+  }
+})
 </script>
 
 <style scoped lang="scss" src="../styles/PackagingConfig.scss"></style>
